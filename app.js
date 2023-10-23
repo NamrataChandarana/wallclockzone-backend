@@ -28,11 +28,6 @@ app.use(express.static(path.join(path.resolve(), "public")));
 //setting view engine
 app.set("view engine", "ejs");
 
-//middelwares
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-app.use(express.json());
-app.use("/api/v1/users", userRouter);
 app.use(
   cors({
     origin: [process.env.FRONTEND_URL],
@@ -40,6 +35,19 @@ app.use(
     credentials: true,
   })
 );
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
+
+//middelwares
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(express.json());
+app.use("/api/v1/users", userRouter);
 
 //error middelware
 app.use(errorMiddleware);
