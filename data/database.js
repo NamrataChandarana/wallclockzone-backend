@@ -10,7 +10,7 @@ export const connectDB = (db) => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     })
-    .then(() => {
-      console.log("connectd");
+    .then((c) => {
+      console.log(`connectd ${c.connection.host}`);
     });
 };
