@@ -44,12 +44,7 @@ router.put(
   authorizeRoles("admin"),
   updateUserStatus
 );
-router.put(
-  "/admin/me/update",
-  isAuthenticate,
-  authorizeRoles("admin"),
-  updateUserProfile
-);
+router.put("/me/update", isAuthenticate, updateUserProfile);
 
 router
   .route("/admin/:id")
