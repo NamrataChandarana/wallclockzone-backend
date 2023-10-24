@@ -189,7 +189,6 @@ export const updateUserProfile = catchAsyncError(async (req, res, next) => {
     address: req.body.address,
     email: req.body.email,
     website: req.body.website,
-    role: req.body.role,
   };
 
   const user = await register.findByIdAndUpdate(req.user.id, newUserData, {
