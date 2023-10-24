@@ -45,9 +45,8 @@ router.put(
   updateUserStatus
 );
 router.put(
-  "/admin/me/update",
+  "/me/update",
   isAuthenticate,
-  authorizeRoles("admin"),
   updateUserProfile
 );
 
