@@ -22,7 +22,7 @@ const router = express.Router();
 
 router.post("/new", userRegister);
 router.post("/login", userLogin);
-router.get("/me", isAuthenticate, myProfile);
+router.get("/me", myProfile);
 router.get("/logout", logout);
 router.get(
   "/admin/newusers",
