@@ -69,7 +69,7 @@ export const userLogin = catchAsyncError(async (req, res, next) => {
 
 // get profile
 export const myProfile = catchAsyncError((req, res, next) => {
-  console.log(req.user.role);
+
   res.status(200).json({
     success: true,
     user: req.user,
