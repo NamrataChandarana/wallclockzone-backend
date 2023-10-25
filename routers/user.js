@@ -30,7 +30,7 @@ router.get(
   authorizeRoles("admin"),
   getallnewusers
 );
-router.get("/allusers", isAuthenticate, getUsers);
+router.get("/allusers", getUsers);
 router.get("/admin/all", isAuthenticate, authorizeRoles("admin"), getAllUser);
 router.get(
   "/admin/approved",
