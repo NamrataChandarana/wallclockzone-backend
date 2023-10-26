@@ -61,7 +61,7 @@ export const userLogin = catchAsyncError(async (req, res, next) => {
 
   const isMatch = await bycrypt.compare(password, user.password);
 
-  if (!user) next(new errorHandler("Invalid Email or Password ", 400));
+  if (!isMatch) next(new errorHandler("Invalid Email or Password ", 400));
 
   console.log(user._id);
   sendcookie(user, res, 200, `welcome back, ${user.firstname}`);
