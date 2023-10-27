@@ -9,20 +9,14 @@ const registration = new mongoose.Schema({
   firstname: {
     type: String,
     required: [true, "Please Enter Your fristName"],
-    // maxLength: [30, "Name cannot exceed 30 characters"],
-    // minLength: [4, "Name should have more than 4 characters"],
   },
   lastname: {
     type: String,
     required: [true, "Please Enter Your lastName"],
-    // maxLength: [30, "Name cannot exceed 30 characters"],
-    // minLength: [4, "Name should have more than 4 characters"],
   },
   companyname: {
     type: String,
     required: [true, "Please Enter Your name of company"],
-    // maxLength: [30, "Name cannot exceed 30 characters"],
-    // minLength: [4, "Name should have more than 4 characters"],
   },
   phoneNo: {
     type: Number,
