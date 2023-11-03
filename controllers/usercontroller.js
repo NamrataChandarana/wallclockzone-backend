@@ -159,6 +159,9 @@ export const updateUserStatus = catchAsyncError(async (req, res, next) => {
     if (user.status === "false") user.status = "true";
     else user.status = "false";
 
+  
+  await user.save();
+
   res.status(200).json({
     success: true,
     user,
