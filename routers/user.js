@@ -38,17 +38,17 @@ router.get(
   authorizeRoles("admin"),
   getApprovedUsers
 );
-router.put(
-  "/admin/status/update",
-  isAuthenticate,
-  authorizeRoles("admin"),
-  updateUserStatus
-);
 // router.put(
-//   "/me/update",
+//   "/admin/status/update",
 //   isAuthenticate,
-//   updateUserProfile
+//   authorizeRoles("admin"),
+//   updateUserStatus
 // );
+router.put(
+  "/me/update",
+  isAuthenticate,
+  updateUserProfile
+);
 
 router
   .route("/admin/:id")
