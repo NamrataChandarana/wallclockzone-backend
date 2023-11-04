@@ -44,15 +44,16 @@ router.put(
   authorizeRoles("admin"),
   updateUserStatus
 );
-router.put(
-  "/me/update",
-  isAuthenticate,
-  updateUserProfile
-);
+// router.put(
+//   "/me/update",
+//   isAuthenticate,
+//   updateUserProfile
+// );
 
 router
   .route("/admin/:id")
   .get(isAuthenticate, authorizeRoles("admin"), getSingleUser)
+  .put(isAuthenticate, authorizeRoles("admin"), updateUserStatus)
   .delete(isAuthenticate, authorizeRoles("admin"), deleteUser);
 
 export default router;
