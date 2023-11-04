@@ -156,7 +156,7 @@ export const updateUserStatus = catchAsyncError(async (req, res, next) => {
       new errorHandler(`User does not exist with Id: ${req.params.id}`, 400)
     );
 
-     if (user.status === "false") {
+     if (user.status == "false") {
     user.status = "true";
   } else {
     user.status = "false";
