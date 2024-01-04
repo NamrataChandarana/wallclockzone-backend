@@ -72,7 +72,6 @@ export const userLogin = catchAsyncError(async (req, res, next) => {
 
 // get profile
 export const myProfile = catchAsyncError((req, res, next) => {
-
   res.status(200).json({
     success: true,
     user: req.user,
@@ -161,23 +160,12 @@ export const updateUserStatus = catchAsyncError(async (req, res, next) => {
       new errorHandler(`User does not exist with Id: ${req.params.id}`, 400)
     );
 
-<<<<<<< HEAD
-  if (user.status == "false") {
-=======
-     if (user.status == false) {
->>>>>>> a4b0aa3f8000e3ec2ae8312e847392edbf4071be
+  if (user.status == false) {
     user.status = "true";
   } else {
     user.status = "false";
   }
 
-<<<<<<< HEAD
-  // if (user.status === "false") user.status = "true";
-  // else user.status = "false";
-
-=======
-  
->>>>>>> a4b0aa3f8000e3ec2ae8312e847392edbf4071be
   await user.save();
 
   res.status(200).json({
