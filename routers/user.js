@@ -12,6 +12,8 @@ import {
   updateUserStatus,
   updateUserProfile,
   getUsers,
+  forgetPassword,
+  resetPassword,
 } from "../controllers/usercontroller.js";
 import { isAuthenticate } from "../middleware/auth.js";
 import { authorizeRoles } from "../middleware/auth.js";
@@ -24,13 +26,16 @@ router.post("/new", userRegister);
 router.post("/login", userLogin);
 router.get("/me", isAuthenticate, myProfile);
 router.get("/logout", logout);
+router.put("/me/update", updateUserProfile);
+router.post("/forgetPassword", forgetPassword);
+router.put("/resetPassword/:token", resetPassword);
 router.get(
   "/admin/newusers",
   isAuthenticate,
   authorizeRoles("admin"),
   getallnewusers
 );
-router.get("/allusers", isAuthenticate, getUsers);
+router.get("/allusers", getUsers);
 router.get("/admin/all", isAuthenticate, authorizeRoles("admin"), getAllUser);
 router.get(
   "/admin/approved",
@@ -38,17 +43,16 @@ router.get(
   authorizeRoles("admin"),
   getApprovedUsers
 );
-router.put(
-  "/admin/status/update",
-  isAuthenticate,
-  authorizeRoles("admin"),
-  updateUserStatus
-);
-router.put("/me/update", isAuthenticate, updateUserProfile);
-
+// router.put(
+//   "/admin/status/update",
+//   isAuthenticate,
+//   authorizeRoles("admin"),
+//   updateUserStatus
+// );
 router
   .route("/admin/:id")
   .get(isAuthenticate, authorizeRoles("admin"), getSingleUser)
+  .put(isAuthenticate, authorizeRoles("admin"), updateUserStatus)
   .delete(isAuthenticate, authorizeRoles("admin"), deleteUser);
 
 export default router;

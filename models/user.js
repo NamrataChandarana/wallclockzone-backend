@@ -1,7 +1,8 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import crypto from "crypto";
 
 // schema and model for registration
-const registration = new mongoose.Schema({
+const registrationSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: new Date(),
@@ -9,20 +10,14 @@ const registration = new mongoose.Schema({
   firstname: {
     type: String,
     required: [true, "Please Enter Your fristName"],
-    // maxLength: [30, "Name cannot exceed 30 characters"],
-    // minLength: [4, "Name should have more than 4 characters"],
   },
   lastname: {
     type: String,
     required: [true, "Please Enter Your lastName"],
-    // maxLength: [30, "Name cannot exceed 30 characters"],
-    // minLength: [4, "Name should have more than 4 characters"],
   },
   companyname: {
     type: String,
     required: [true, "Please Enter Your name of company"],
-    // maxLength: [30, "Name cannot exceed 30 characters"],
-    // minLength: [4, "Name should have more than 4 characters"],
   },
   phoneNo: {
     type: Number,
@@ -68,15 +63,28 @@ const registration = new mongoose.Schema({
   },
   status: {
     type: Boolean,
-    default: false,
+    default: "false",
   },
   role: {
     type: String,
     default: "user",
   },
+  resetPasswordToken: String,
+  resetPasswordExpire: String,
 });
 
-export const register = new mongoose.model("registration", registration);
+registrationSchema.methods.getResetToken = function () {
+  const token = crypto.randomBytes(32).toString("hex");
+  this.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+  return token;
+};
+
+export const register = new mongoose.model("registration", registrationSchema);
 
 // const stateModel = mongoose.Schema({
 //   name: { type: String },

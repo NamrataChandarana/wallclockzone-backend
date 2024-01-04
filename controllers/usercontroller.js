@@ -5,6 +5,8 @@ import { catchAsyncError } from "../middleware/catchAsyncError.js";
 import { errorHandler } from "../middleware/error.js";
 import jwt from "jsonwebtoken";
 import { Apifeature } from "../utils/apifeature.js";
+import crypto from "crypto";
+import { sendEmail } from "../utils/sendEmail.js";
 
 // registration
 export const userRegister = catchAsyncError(async (req, res, next) => {
@@ -56,14 +58,15 @@ export const userLogin = catchAsyncError(async (req, res, next) => {
   const { email, password } = req.body;
 
   let user = await register.findOne({ email }).select("+password");
+  console.log(user);
 
   if (!user) next(new errorHandler("Invalid Email or Password ", 400));
 
   const isMatch = await bycrypt.compare(password, user.password);
 
-  if (!user) next(new errorHandler("Invalid Email or Password ", 400));
+  if (!isMatch) next(new errorHandler("Invalid Email or Password ", 400));
 
-  console.log(user._id);
+  // console.log(user._id);
   sendcookie(user, res, 200, `welcome back, ${user.firstname}`);
 });
 
@@ -132,6 +135,7 @@ export const getSingleUser = catchAsyncError(async (req, res, next) => {
 export const deleteUser = catchAsyncError(async (req, res, next) => {
   const user = await register.findById(req.params.id);
   console.log(req.params.id);
+  console.log(user);
 
   if (!user)
     return next(
@@ -148,20 +152,29 @@ export const deleteUser = catchAsyncError(async (req, res, next) => {
 
 // approveUser by admin  --admin
 export const updateUserStatus = catchAsyncError(async (req, res, next) => {
-  const newUserData = {
-    email: req.body.email,
-    status: req.body.status,
-  };
+  const user = await register.findById(req.params.id);
+  console.log(req.params.id);
+  console.log(user);
 
-  const user = await register.findByIdAndUpdate(req.user.id, newUserData, {
-    new: true,
-    runValidators: true,
-    useFindAndModify: false,
-  });
+  if (!user)
+    return next(
+      new errorHandler(`User does not exist with Id: ${req.params.id}`, 400)
+    );
+
+  if (user.status == "false") {
+    user.status = "true";
+  } else {
+    user.status = "false";
+  }
+
+  // if (user.status === "false") user.status = "true";
+  // else user.status = "false";
+
+  await user.save();
 
   res.status(200).json({
     success: true,
-    user,
+    message: "status updated",
   });
 });
 
@@ -218,4 +231,58 @@ export const getUsers = catchAsyncError(async (req, res, next) => {
     success: "ture",
     user,
   });
+});
+
+//forgatePassword
+export const forgetPassword = catchAsyncError(async (req, res, next) => {
+  const { email } = req.body;
+  const user = await register.findOne({ email });
+  if (!user) res.status(400).send("User not found");
+  // console.log(user);
+
+  //generate Token
+  const resetToken = await user.getResetToken();
+  await user.save();
+  // console.log(resetToken);
+
+  const url = `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`;
+  console.log(url);
+
+  const msg = `Click on link to reset password. ${url}.`;
+
+  //send token in mail
+  sendEmail(user.email, msg, "wall Clock Zone ResetPassword");
+
+  res
+    .status(200)
+    .json({ success: true, msg: `Reset token has send to ${user.email}` });
+});
+
+//resetPassword
+export const resetPassword = catchAsyncError(async (req, res, next) => {
+  const { token } = req.params;
+  console.log(token);
+
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+  console.log(resetPasswordToken);
+  const user = await register.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+  if (!user) return next(new errorHandler("Invalid token or it is expired"));
+
+  // if (user.password === req.body.password) {
+  //   return next(new errorHandler("New Password cannot be same as old one"));
+  // }
+
+  //change pwd
+  user.password = req.body.password;
+  user.resetPasswordExpire = undefined;
+  user.resetPasswordToken = undefined;
+
+  await user.save();
+  res.status(200).json({ success: true, msg: `Reset Password` });
 });
