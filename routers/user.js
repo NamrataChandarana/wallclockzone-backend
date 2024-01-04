@@ -24,7 +24,7 @@ const router = express.Router();
 
 router.post("/new", userRegister);
 router.post("/login", userLogin);
-router.get("/me",isAuthenticate, myProfile);
+router.get("/me", isAuthenticate, myProfile);
 router.get("/logout", logout);
 router.put("/me/update", updateUserProfile);
 router.post("/forgetPassword", forgetPassword);
@@ -49,15 +49,7 @@ router.get(
 //   authorizeRoles("admin"),
 //   updateUserStatus
 // );
-<<<<<<< HEAD
-=======
-router.put(
-  "/me/update",
-  isAuthenticate,
-  updateUserProfile
-);
 
->>>>>>> a4b0aa3f8000e3ec2ae8312e847392edbf4071be
 router
   .route("/admin/:id")
   .get(isAuthenticate, authorizeRoles("admin"), getSingleUser)
