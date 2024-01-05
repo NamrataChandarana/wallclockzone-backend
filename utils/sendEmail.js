@@ -10,10 +10,12 @@ export const sendEmail = async (to, text, subject) => {
     },
   });
 
+  console.log(sendEmail);
   const info = await transporter.sendMail({
     // from: "myid@gmail.com", // sender address
     to,
     subject,
     text,
   });
+  console.log(info);
 };

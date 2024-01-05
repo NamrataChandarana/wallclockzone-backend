@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import { Apifeature } from "../utils/apifeature.js";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
+import { isAuthenticate } from "../middleware/auth.js";
 
 // registration
 export const userRegister = catchAsyncError(async (req, res, next) => {
