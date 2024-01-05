@@ -276,7 +276,9 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
   // }
 
   //change pwd
-  user.password = req.body.password;
+  const hashpwd = await bycrypt.hash(req.body.password, 10);
+
+  user.password = hashpwd;
   user.resetPasswordExpire = undefined;
   user.resetPasswordToken = undefined;
 
