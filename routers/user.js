@@ -14,6 +14,12 @@ import {
   getUsers,
   forgetPassword,
   resetPassword,
+  accessChat,
+  fetchChats,
+  // conversations,
+  // getConversations,
+  // messages,
+  // getMessages,
 } from "../controllers/usercontroller.js";
 import { isAuthenticate } from "../middleware/auth.js";
 import { authorizeRoles } from "../middleware/auth.js";
@@ -29,6 +35,16 @@ router.get("/logout", logout);
 router.put("/me/update", updateUserProfile);
 router.post("/forgetPassword", forgetPassword);
 router.put("/resetPassword/:token", resetPassword);
+
+//chat router
+// router.post("/conversations", conversations);
+// router.get("/conversations/:userId", getConversations);
+// router.post("/messages", messages);
+// router.get("/messages/:conversationId", getMessages);
+router.route("/chat").post(isAuthenticate, accessChat);
+router.route("/getchat").get(isAuthenticate, fetchChats);
+
+// admin router
 router.get(
   "/admin/newusers",
   isAuthenticate,

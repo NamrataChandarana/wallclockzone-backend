@@ -9,6 +9,8 @@ import cookieParser from "cookie-parser";
 import { errorMiddleware } from "./middleware/error.js";
 import path from "path";
 import cors from "cors";
+import { Server } from "socket.io";
+import { Socket } from "dgram";
 
 // import cookieParser from 'cookie-parser';
 // import { connect } from 'http2';
@@ -23,11 +25,6 @@ process.on("uncaughtException", (err) => {
 // create server
 const app = express();
 
-app.use(express.static(path.join(path.resolve(), "public")));
-
-//setting view engine
-app.set("view engine", "ejs");
-
 app.use(
   cors({
     origin: [process.env.FRONTEND_URL],
@@ -35,6 +32,11 @@ app.use(
     credentials: true,
   })
 );
+
+app.use(express.static(path.join(path.resolve(), "public")));
+
+//setting view engine
+app.set("view engine", "ejs");
 
 // app.use((req, res, next) => {
 //   res.header("Access-Control-Allow-Origin: http://localhost:3000");
@@ -60,6 +62,11 @@ connectDB();
 
 const listen = app.listen(process.env.PORT, (req, res) => {
   console.log(`done and ${process.env.FRONTEND_URL}`);
+});
+const io = new Server(listen);
+io.on("connection", (socket) => {
+  console.log("user connected");
+  console.log("Id", socket.id);
 });
 
 //unhandled error (server error)

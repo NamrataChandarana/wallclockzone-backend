@@ -2,20 +2,26 @@ import { createTransport } from "nodemailer";
 
 export const sendEmail = async (to, text, subject) => {
   const transporter = createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
+    host: smtp.gmail.com,
+    port: 587,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
   });
 
-  console.log(sendEmail);
-  const info = await transporter.sendMail({
-    // from: "myid@gmail.com", // sender address
-    to,
-    subject,
-    text,
-  });
-  console.log(info);
+  try {
+    const info = await transporter.sendMail({
+      from: {
+        name: "Wall Clock Zone",
+        address: process.env.SMTP_USER, // sender address
+      },
+      to,
+      subject,
+      text,
+    });
+    console.log(info);
+  } catch (error) {
+    console.log("can't send mail ", error);
+  }
 };

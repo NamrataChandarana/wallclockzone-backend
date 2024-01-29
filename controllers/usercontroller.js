@@ -1,4 +1,6 @@
 import { register } from "../models/user.js";
+// import { Conversations } from "../models/conversations.js";
+// import { Messages } from "../models/messages.js";
 import bycrypt from "bcryptjs";
 import { sendcookie } from "../utils/features.js";
 import { catchAsyncError } from "../middleware/catchAsyncError.js";
@@ -8,6 +10,9 @@ import { Apifeature } from "../utils/apifeature.js";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
 import { isAuthenticate } from "../middleware/auth.js";
+import { promiseHooks } from "v8";
+import { Chat } from "../models/chatModel.js";
+import { Message } from "../models/messageModel.js";
 
 // registration
 export const userRegister = catchAsyncError(async (req, res, next) => {
@@ -264,19 +269,24 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
     .createHash("sha256")
     .update(token)
     .digest("hex");
-  console.log(resetPasswordToken);
+  // console.log(resetPasswordToken);
   const user = await register.findOne({
     resetPasswordToken,
     resetPasswordExpire: { $gt: Date.now() },
   });
+  console.log(user);
   if (!user) return next(new errorHandler("Invalid token or it is expired"));
 
-  // if (user.password === req.body.password) {
-  //   return next(new errorHandler("New Password cannot be same as old one"));
+  const hashpwd = await bycrypt.hash(req.body.password, 10);
+
+  // let passwordsMatch = await bycrypt.compare(hashpwd, user.password);
+  // console.log(passwordsMatch);
+
+  // if (hashpwd === user.password) {
+  //   return next(new errorHandler("you can't set password same as old one"));
   // }
 
   //change pwd
-  const hashpwd = await bycrypt.hash(req.body.password, 10);
 
   user.password = hashpwd;
   user.resetPasswordExpire = undefined;
@@ -284,4 +294,154 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
 
   await user.save();
   res.status(200).json({ success: true, msg: `Reset Password` });
+});
+
+//store converstation
+// export const conversations = catchAsyncError(async (req, res) => {
+//   const { senderId, receiverId } = req.body;
+//   const newConversation = new Conversations({
+//     members: [senderId, receiverId],
+//   });
+//   await newConversation.save();
+//   res.status(200).send("Conversation created successfully");
+// });
+
+//get conversations
+// export const getConversations = catchAsyncError(async (req, res) => {
+//   const userId = req.params.userId;
+//   console.log(userId);
+//   const conversations = await Conversations.find({
+//     members: { $in: [userId] },
+//   });
+//   console.log(conversations);
+//   const conversationUserData = Promise.all(
+//     conversations.map(async (conversation) => {
+//       const receiverId = conversation.members.find(
+//         (member) => member !== userId
+//       );
+//       console.log("id", receiverId);
+//       const user = await register.findById(receiverId);
+//       return {
+//         user: { email: user.email, fullName: user.fullname },
+//         conversationId: conversation._id,
+//       };
+//     })
+//   );
+//   res.status(200).json(await conversationUserData);
+// });
+
+// //store msg
+// export const messages = catchAsyncError(async (req, res) => {
+//   const { conversationId, senderId, message } = req.body;
+//   if (!senderId || !message)
+//     return res.status(400).send("please fill all required fields");
+//   if (!conversationId && receiverId) {
+//     const newConversation = new Conversations({
+//       members: [senderId, receiverId],
+//     });
+//     await newConversation.save();
+//     const newMessage = new Messages({
+//       conversationId: newConversation._id,
+//       senderId,
+//       message,
+//     });
+//     await newMessage.save();
+//     res.status(200).send("Message sent successfully");
+//   } else if (!conversationId && !receiverId) {
+//     return res.status(400).send("please fill all required fields");
+//   }
+//   const newMessage = new Messages({ conversationId, senderId, message });
+//   await newMessage.save();
+//   res.status(200).send("Message sent successfully");
+// });
+
+//get msg
+// export const getMessages = catchAsyncError(async (req, res) => {
+//   const conversationId = req.params.conversationId;
+//   if (conversationId === "new") return res.status(200).json([]);
+//   const messages = await Messages.find({ conversationId });
+//   const messageUserData = Promise.all(
+//     messages.map(async (message) => {
+//       const user = await register.findById(message.senderId);
+//       return {
+//         user: { email: user.email, fullName: user.fullName },
+//         message: message.message,
+//       };
+//     })
+//   );
+
+//   res.status(200).json(await messageUserData);
+// });
+
+//
+
+export const accessChat = catchAsyncError(async (req, res) => {
+  const { userId } = req.body;
+
+  if (!userId) {
+    console.log("UserId param not sent with request");
+    return res.sendStatus(400);
+  }
+
+  // console.log(req.user);
+  var isChat = await Chat.find({
+    isGroupChat: false,
+    $and: [
+      { users: { $elemMatch: { $eq: req.user._id } } },
+      { users: { $elemMatch: { $eq: userId } } },
+    ],
+  })
+    // .populate("users", "-password")
+    .populate("latestMessage");
+
+  console.log(isChat);
+  console.log(register);
+  isChat = await register.populate(isChat, {
+    path: "latestMessage.sender",
+    // select: "firstname email",
+  });
+
+  if (isChat.length > 0) {
+    res.send(isChat[0]);
+  } else {
+    var chatData = {
+      chatName: "sender",
+      isGroupChat: false,
+      users: [req.user._id, userId],
+    };
+
+    try {
+      const createdChat = await Chat.create(chatData);
+      const FullChat = await Chat.findOne({ _id: createdChat._id }).populate(
+        "users",
+        "-password"
+      );
+      res.status(200).json(FullChat);
+    } catch (error) {
+      res.status(400);
+      throw new Error(error.message);
+    }
+  }
+});
+
+//getchat
+export const fetchChats = catchAsyncError(async (req, res) => {
+  try {
+    Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })
+      // .populate("users", "-password")
+      // .populate("groupAdmin", "-password")
+      .populate("latestMessage")
+      .sort({ updatedAt: -1 })
+      .then(async (results) => {
+        results = await register.populate(results, {
+          path: "latestMessage.sender",
+          select: "firstname email",
+        });
+        console.log(results);
+        res.status(200).send(results);
+      });
+  } catch (error) {
+    res.status(400);
+    throw new Error(error.message);
+  }
 });
