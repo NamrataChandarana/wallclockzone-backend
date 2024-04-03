@@ -20,7 +20,7 @@ export class Apifeature {
 
   filter() {
     const queryCopy = { ...this.queryStr };
-    // console.log(queryCopy);
+    console.log(queryCopy);
     const removeFields = ["keyword", "page", "limit"];
 
     removeFields.forEach((key) => delete queryCopy[key]);

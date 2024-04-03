@@ -306,10 +306,15 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
 //   res.status(200).send("Conversation created successfully");
 // });
 
-//get conversations
+// // get conversations
 // export const getConversations = catchAsyncError(async (req, res) => {
 //   const userId = req.params.userId;
 //   console.log(userId);
+
+//   if (!userId) {
+//     console.log("UserId param not sent with request");
+//     return res.sendStatus(400);
+//   }
 //   const conversations = await Conversations.find({
 //     members: { $in: [userId] },
 //   });
@@ -322,7 +327,7 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
 //       console.log("id", receiverId);
 //       const user = await register.findById(receiverId);
 //       return {
-//         user: { email: user.email, fullName: user.fullname },
+//         user: { email: user.email, firstName: user.firstname },
 //         conversationId: conversation._id,
 //       };
 //     })
@@ -355,7 +360,7 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
 //   res.status(200).send("Message sent successfully");
 // });
 
-//get msg
+// // get msg
 // export const getMessages = catchAsyncError(async (req, res) => {
 //   const conversationId = req.params.conversationId;
 //   if (conversationId === "new") return res.status(200).json([]);
@@ -364,7 +369,7 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
 //     messages.map(async (message) => {
 //       const user = await register.findById(message.senderId);
 //       return {
-//         user: { email: user.email, fullName: user.fullName },
+//         user: { email: user.email, firstName: user.firstname },
 //         message: message.message,
 //       };
 //     })
@@ -374,6 +379,18 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
 // });
 
 //
+
+export const searchUser = catchAsyncError(async (req, res) => {
+  const keyword = req.query.search ? {
+    $or: [
+      {companyname: {$regex: req.query.search, $options: "i"}},
+      {email: {$regex: req.query.search, $options: "i"}},
+    ],
+  } : {};
+
+  const users = await register.find(keyword).find({_id: {$ne: req.user._id}});
+  res.send(users);
+})
 
 export const accessChat = catchAsyncError(async (req, res) => {
   const { userId } = req.body;
@@ -391,14 +408,14 @@ export const accessChat = catchAsyncError(async (req, res) => {
       { users: { $elemMatch: { $eq: userId } } },
     ],
   })
-    // .populate("users", "-password")
+    .populate("users", "-password")
     .populate("latestMessage");
 
   console.log(isChat);
   console.log(register);
-  isChat = await register.populate(isChat, {
+  isChat = await Chat.populate(isChat, {
     path: "latestMessage.sender",
-    // select: "firstname email",
+    select: "firstname email",
   });
 
   if (isChat.length > 0) {
@@ -428,7 +445,7 @@ export const accessChat = catchAsyncError(async (req, res) => {
 export const fetchChats = catchAsyncError(async (req, res) => {
   try {
     Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })
-      // .populate("users", "-password")
+      .populate("users", "-password")
       // .populate("groupAdmin", "-password")
       .populate("latestMessage")
       .sort({ updatedAt: -1 })
@@ -440,6 +457,55 @@ export const fetchChats = catchAsyncError(async (req, res) => {
         console.log(results);
         res.status(200).send(results);
       });
+  } catch (error) {
+    res.status(400);
+    throw new Error(error.message);
+  }
+});
+
+
+export const allMessages = catchAsyncError(async (req, res) => {
+  try {
+    const messages = await Message.find({ chat: req.params.chatId })
+      .populate("sender", "name pic email")
+      .populate("chat");
+    res.json(messages);
+  } catch (error) {
+    res.status(400);
+    throw new Error(error.message);
+  }
+});
+
+//@description     Create New Message
+//@route           POST /api/Message/
+//@access          Protected
+export const sendMessage = catchAsyncError(async (req, res) => {
+  const { content, chatId } = req.body;
+
+  if (!content || !chatId) {
+    console.log("Invalid data passed into request");
+    return res.sendStatus(400);
+  }
+
+  var newMessage = {
+    sender: req.user._id,
+    content: content,
+    chat: chatId,
+  };
+
+  try {
+    var message = await Message.create(newMessage);
+
+    message = await message.populate("sender", "firstname lastname username compnyname") 
+    message = await message.populate("chats")
+    message = await register.populate(message, {
+      path: "chat.users",  //pending chat field is not in register model
+      select: "firstname lastname compnyname ",
+    });
+
+    await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message });
+
+    res.json(message);
   } catch (error) {
     res.status(400);
     throw new Error(error.message);

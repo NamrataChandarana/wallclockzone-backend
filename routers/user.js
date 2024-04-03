@@ -16,6 +16,9 @@ import {
   resetPassword,
   accessChat,
   fetchChats,
+  searchUser,
+  allMessages,
+  sendMessage
   // conversations,
   // getConversations,
   // messages,
@@ -37,12 +40,17 @@ router.post("/forgetPassword", forgetPassword);
 router.put("/resetPassword/:token", resetPassword);
 
 //chat router
-// router.post("/conversations", conversations);
-// router.get("/conversations/:userId", getConversations);
-// router.post("/messages", messages);
-// router.get("/messages/:conversationId", getMessages);
+// router.post("/conversations", isAuthenticate, conversations);
+// router.get("/conversations/:userId", isAuthenticate, getConversations);
+// router.post("/messages", isAuthenticate, messages);
+// router.get("/messages/:conversationId", isAuthenticate, getMessages);
+
+// not
 router.route("/chat").post(isAuthenticate, accessChat);
 router.route("/getchat").get(isAuthenticate, fetchChats);
+router.route("/searchUser").get(isAuthenticate, searchUser);
+router.route("/getMsg").get(isAuthenticate, allMessages);
+router.route("/sendMsg").post(isAuthenticate, sendMessage);
 
 // admin router
 router.get(
