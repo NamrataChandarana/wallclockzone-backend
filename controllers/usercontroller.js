@@ -389,6 +389,10 @@ export const searchUser = catchAsyncError(async (req, res) => {
   } : {};
 
   const users = await register.find(keyword).find({_id: {$ne: req.user._id}});
+  res.status(200).json({
+    success: true,
+    users
+  })
   res.send(users);
 })
 
