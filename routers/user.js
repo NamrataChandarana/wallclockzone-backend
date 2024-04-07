@@ -49,7 +49,7 @@ router.put("/resetPassword/:token", resetPassword);
 router.route("/chat").post(isAuthenticate, accessChat);
 router.route("/getchat").get(isAuthenticate, fetchChats);
 router.route("/searchUser").get(isAuthenticate, searchUser);
-router.route("/getMsg").get(isAuthenticate, allMessages);
+router.route("/getMsg/:chatId").get(isAuthenticate, allMessages);
 router.route("/sendMsg").post(isAuthenticate, sendMessage);
 
 // admin router
