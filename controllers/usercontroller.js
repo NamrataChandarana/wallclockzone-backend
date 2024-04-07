@@ -380,20 +380,25 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
 
 //
 
-export const searchUser = catchAsyncError(async (req, res) => {
+export const searchUser = catchAsyncError(async (req, res, next) => {
   const keyword = req.query.search ? {
     $or: [
       {companyname: {$regex: req.query.search, $options: "i"}},
       {email: {$regex: req.query.search, $options: "i"}},
     ],
-  } : {};
+  } : null;
+
+  console.log(keyword)
+  if (!keyword) return next(new errorHandler("Please Enter Something ", 400));
 
   const users = await register.find(keyword).find({_id: {$ne: req.user._id}});
+  console.log(users)
+  
   res.status(200).json({
     success: true,
     users
   })
-  res.send(users);
+  // res.send(users);
 })
 
 export const accessChat = catchAsyncError(async (req, res) => {
@@ -499,17 +504,19 @@ export const sendMessage = catchAsyncError(async (req, res) => {
 
   try {
     var message = await Message.create(newMessage);
+    console.log(message);
 
     message = await message.populate("sender", "firstname lastname username compnyname") 
     message = await message.populate("chats")
     message = await register.populate(message, {
-      path: "chat.users",  //pending chat field is not in register model
+      path: "chats.users",  //pending chat field is not in register model
       select: "firstname lastname compnyname ",
     });
+    console.log(message)
 
     await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message });
 
-    res.json(message);
+    res.status(200).send(message);
   } catch (error) {
     res.status(400);
     throw new Error(error.message);
