@@ -7,10 +7,10 @@ const chatModel = mongoose.Schema(
   {
     chatName: { type: String, trim: true },
     isGroupChat: { type: Boolean, default: false },
-    users: [{ type: mongoose.Schema.Types.ObjectId, ref: register }],
+    users: [{ type: mongoose.Schema.Types.ObjectId, ref: "registration" }],
     latestMessage: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: Message,
+      ref: "Message",
     },
   },
   { timestamps: true }

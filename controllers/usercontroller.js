@@ -474,11 +474,12 @@ export const fetchChats = catchAsyncError(async (req, res) => {
 
 
 export const allMessages = catchAsyncError(async (req, res) => {
+  // console.log(typeOf (req.params.chatId));
   try {
-    const messages = await Message.find({ chat: req.params.chatId })
-      .populate("sender", "name pic email")
-      .populate("chat");
-    res.json(messages);
+    var messages = await Message.find({ chat: req.params.chatId })
+        .populate("sender", "firstname companyname email")
+        .populate("chat");
+    res.status(200).send(messages);
   } catch (error) {
     res.status(400);
     throw new Error(error.message);
@@ -490,6 +491,7 @@ export const allMessages = catchAsyncError(async (req, res) => {
 //@access          Protected
 export const sendMessage = catchAsyncError(async (req, res) => {
   const { content, chatId } = req.body;
+  console.log(chatId);
 
   if (!content || !chatId) {
     console.log("Invalid data passed into request");
@@ -507,9 +509,9 @@ export const sendMessage = catchAsyncError(async (req, res) => {
     console.log(message);
 
     message = await message.populate("sender", "firstname lastname username compnyname") 
-    message = await message.populate("chats")
+    message = await message.populate("chat")
     message = await register.populate(message, {
-      path: "chats.users",  //pending chat field is not in register model
+      path: "chat.users",  //pending chat field is not in register model
       select: "firstname lastname compnyname ",
     });
     console.log(message)

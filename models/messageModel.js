@@ -18,10 +18,10 @@ import { Chat } from "./chatModel.js";
 
 const messageSchema = mongoose.Schema(
   {
-    sender: { type: mongoose.Schema.Types.ObjectId, ref:register },
+    sender: { type: mongoose.Schema.Types.ObjectId, ref:"registration" },
     content: { type: String, trim: true },
-    chats: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
-    readBy: [{ type: mongoose.Schema.Types.ObjectId, ref: register }],
+    chat: { type: mongoose.Schema.Types.ObjectId, ref:"Chat" },
+    readBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "registration" }],
   },
   { timestamps: true }
 );
