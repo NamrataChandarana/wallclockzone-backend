@@ -63,7 +63,13 @@ connectDB();
 const listen = app.listen(process.env.PORT, (req, res) => {
   console.log(`done and ${process.env.FRONTEND_URL}`);
 });
-const io = new Server(listen);
+const io = new Server(listen,{
+  pingTimeout: 60000,
+  cors: {
+    origin: process.env.FRONTEND_URL,
+  }
+});
+
 io.on("connection", (socket) => {
   console.log("user connected");
   console.log("Id", socket.id);
