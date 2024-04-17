@@ -402,6 +402,7 @@ export const searchUser = catchAsyncError(async (req, res, next) => {
 })
 
 export const accessChat = catchAsyncError(async (req, res) => {
+  console.log("hello")
   const { userId } = req.body;
 
   if (!userId) {
@@ -420,8 +421,8 @@ export const accessChat = catchAsyncError(async (req, res) => {
     .populate("users", "-password")
     .populate("latestMessage");
 
-  console.log(isChat);
-  console.log(register);
+  // console.log(isChat);
+  // console.log(register);
   isChat = await Chat.populate(isChat, {
     path: "latestMessage.sender",
     select: "firstname email",
@@ -429,6 +430,7 @@ export const accessChat = catchAsyncError(async (req, res) => {
 
   if (isChat.length > 0) {
     res.send(isChat[0]);
+    console.log(isChat[0])
   } else {
     var chatData = {
       chatName: "sender",
@@ -448,6 +450,7 @@ export const accessChat = catchAsyncError(async (req, res) => {
       throw new Error(error.message);
     }
   }
+  console.log(res)
 });
 
 //getchat
@@ -517,8 +520,8 @@ export const sendMessage = catchAsyncError(async (req, res) => {
     console.log(message)
 
     await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message });
-
     res.status(200).send(message);
+    
   } catch (error) {
     res.status(400);
     throw new Error(error.message);
