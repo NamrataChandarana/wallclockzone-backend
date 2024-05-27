@@ -13,7 +13,7 @@ import {
   updateUserProfile,
   getUsers,
   forgetPassword,
-  resetPassword,
+  resetPassword
 } from "../controllers/userController.js";
 import { isAuthenticate } from "../middleware/auth.js";
 import { authorizeRoles } from "../middleware/auth.js";
@@ -27,13 +27,6 @@ router.get("/logout", logout);
 router.put("/me/update", updateUserProfile);
 router.post("/forgetPassword", forgetPassword);
 router.put("/resetPassword/:token", resetPassword);
-
-//chat
-// router.route("/chat").post(isAuthenticate, accessChat);
-// router.route("/getchat").get(isAuthenticate, fetchChats);
-// router.route("/searchUser").get(isAuthenticate, searchUser);
-// router.route("/getMsg/:chatId").get(isAuthenticate, allMessages);
-// router.route("/sendMsg").post(isAuthenticate, sendMessage);
 
 // admin router
 router.get(
