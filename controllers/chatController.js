@@ -1,6 +1,7 @@
 import { catchAsyncError } from "../middleware/catchAsyncError.js";
 import { Chat } from "../models/chatModel.js";
 import { register } from "../models/user.js";
+import { Message } from "../models/messageModel.js";
 
 // chat
 
