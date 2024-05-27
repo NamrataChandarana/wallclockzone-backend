@@ -1,16 +1,11 @@
 import { register } from "../models/user.js";
-// import { Conversations } from "../models/conversations.js";
-// import { Messages } from "../models/messages.js";
 import bycrypt from "bcryptjs";
 import { sendcookie } from "../utils/features.js";
 import { catchAsyncError } from "../middleware/catchAsyncError.js";
 import { errorHandler } from "../middleware/error.js";
-import jwt from "jsonwebtoken";
 import { Apifeature } from "../utils/apifeature.js";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
-import { isAuthenticate } from "../middleware/auth.js";
-import { promiseHooks } from "v8";
 import { Chat } from "../models/chatModel.js";
 import { Message } from "../models/messageModel.js";
 
@@ -100,6 +95,116 @@ export const logout = catchAsyncError((req, res, next) => {
     });
 });
 
+//update profile
+export const updateUserProfile = catchAsyncError(async (req, res, next) => {
+  const newUserData = {
+    firstname: req.body.firstname,
+    lastname: req.body.lastname,
+    companyname: req.body.companyname,
+    phoneNo: req.body.phoneNo,
+    username: req.body.username,
+    category: req.body.category,
+    city: req.body.city,
+    state: req.body.state,
+    address: req.body.address,
+    email: req.body.email,
+    website: req.body.website,
+  };
+
+  const user = await register.findByIdAndUpdate(req.user.id, newUserData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "updated Successfully",
+    user,
+  });
+});
+
+// get all user --search side
+export const getUsers = catchAsyncError(async (req, res, next) => {
+  const apifeature = new Apifeature(
+    register.find({ status: "true" }),
+    req.query
+  )
+    .search();
+    // .filter();
+  const user = await apifeature.query;
+
+  res.json({
+    success: "ture",
+    user,
+  });
+});
+
+//forgatePassword
+export const forgetPassword = catchAsyncError(async (req, res,next) => {
+  const { email } = req.body;
+  const user = await register.findOne({ email });
+  if (!user) res.status(400).send("User not found");
+  // console.log(user);
+
+  //generate Token
+  const resetToken = await user.getResetToken();
+  await user.save();
+  // console.log(resetToken);
+
+  const url = `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`;
+  console.log(url);
+
+  const msg = `Click on link to reset password. ${url}.`;
+
+  //send token in mail
+  sendEmail(user.email, msg, "wall Clock Zone ResetPassword");
+
+  res
+    .status(200)
+    .json({ success: true, msg: `Reset token has send to ${user.email}` });
+});
+
+//resetPassword
+export const resetPassword = catchAsyncError(async (req, res, next) => {
+  const { token } = req.params;
+  console.log(token);
+
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+  // console.log(resetPasswordToken);
+  const user = await register.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+  console.log(user);
+  if (!user) return next(new errorHandler("Invalid token or it is expired"));
+
+  const hashpwd = await bycrypt.hash(req.body.password, 10);
+
+  // let passwordsMatch = await bycrypt.compare(hashpwd, user.password);
+  // console.log(passwordsMatch);
+
+  // if (hashpwd === user.password) {
+  //   return next(new errorHandler("you can't set password same as old one"));
+  // }
+
+  //change pwd
+
+  user.password = hashpwd;
+  user.resetPasswordExpire = undefined;
+  user.resetPasswordToken = undefined;
+
+  await user.save();
+  res.status(200).json({ success: true, msg: `Reset Password` });
+});
+
+
+
+//admin
+
 // Get all users(admin)
 export const getAllUser = catchAsyncError(async (req, res, next) => {
   const users = await register.find();
@@ -180,7 +285,7 @@ export const updateUserStatus = catchAsyncError(async (req, res, next) => {
   });
 });
 
-//2. all approved user
+//2. all approved user admin
 export const getApprovedUsers = catchAsyncError(async (req, res, next) => {
   const user = await register.find({ status: "true" });
 
@@ -190,195 +295,9 @@ export const getApprovedUsers = catchAsyncError(async (req, res, next) => {
   });
 });
 
-//update profile
-export const updateUserProfile = catchAsyncError(async (req, res, next) => {
-  const newUserData = {
-    firstname: req.body.firstname,
-    lastname: req.body.lastname,
-    companyname: req.body.companyname,
-    phoneNo: req.body.phoneNo,
-    username: req.body.username,
-    category: req.body.category,
-    city: req.body.city,
-    state: req.body.state,
-    address: req.body.address,
-    email: req.body.email,
-    website: req.body.website,
-  };
 
-  const user = await register.findByIdAndUpdate(req.user.id, newUserData, {
-    new: true,
-    runValidators: true,
-    useFindAndModify: false,
-  });
 
-  res.status(200).json({
-    success: true,
-    message: "updated Successfully",
-    user,
-  });
-});
-
-// get all user --search side
-export const getUsers = catchAsyncError(async (req, res, next) => {
-  const apifeature = new Apifeature(
-    register.find({ status: "true" }),
-    req.query
-  )
-    .search()
-    .filter();
-  const user = await apifeature.query;
-
-  res.json({
-    success: "ture",
-    user,
-  });
-});
-
-//forgatePassword
-export const forgetPassword = catchAsyncError(async (req, res, next) => {
-  const { email } = req.body;
-  const user = await register.findOne({ email });
-  if (!user) res.status(400).send("User not found");
-  // console.log(user);
-
-  //generate Token
-  const resetToken = await user.getResetToken();
-  await user.save();
-  // console.log(resetToken);
-
-  const url = `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`;
-  console.log(url);
-
-  const msg = `Click on link to reset password. ${url}.`;
-
-  //send token in mail
-  sendEmail(user.email, msg, "wall Clock Zone ResetPassword");
-
-  res
-    .status(200)
-    .json({ success: true, msg: `Reset token has send to ${user.email}` });
-});
-
-//resetPassword
-export const resetPassword = catchAsyncError(async (req, res, next) => {
-  const { token } = req.params;
-  console.log(token);
-
-  const resetPasswordToken = crypto
-    .createHash("sha256")
-    .update(token)
-    .digest("hex");
-  // console.log(resetPasswordToken);
-  const user = await register.findOne({
-    resetPasswordToken,
-    resetPasswordExpire: { $gt: Date.now() },
-  });
-  console.log(user);
-  if (!user) return next(new errorHandler("Invalid token or it is expired"));
-
-  const hashpwd = await bycrypt.hash(req.body.password, 10);
-
-  // let passwordsMatch = await bycrypt.compare(hashpwd, user.password);
-  // console.log(passwordsMatch);
-
-  // if (hashpwd === user.password) {
-  //   return next(new errorHandler("you can't set password same as old one"));
-  // }
-
-  //change pwd
-
-  user.password = hashpwd;
-  user.resetPasswordExpire = undefined;
-  user.resetPasswordToken = undefined;
-
-  await user.save();
-  res.status(200).json({ success: true, msg: `Reset Password` });
-});
-
-//store converstation
-// export const conversations = catchAsyncError(async (req, res) => {
-//   const { senderId, receiverId } = req.body;
-//   const newConversation = new Conversations({
-//     members: [senderId, receiverId],
-//   });
-//   await newConversation.save();
-//   res.status(200).send("Conversation created successfully");
-// });
-
-// // get conversations
-// export const getConversations = catchAsyncError(async (req, res) => {
-//   const userId = req.params.userId;
-//   console.log(userId);
-
-//   if (!userId) {
-//     console.log("UserId param not sent with request");
-//     return res.sendStatus(400);
-//   }
-//   const conversations = await Conversations.find({
-//     members: { $in: [userId] },
-//   });
-//   console.log(conversations);
-//   const conversationUserData = Promise.all(
-//     conversations.map(async (conversation) => {
-//       const receiverId = conversation.members.find(
-//         (member) => member !== userId
-//       );
-//       console.log("id", receiverId);
-//       const user = await register.findById(receiverId);
-//       return {
-//         user: { email: user.email, firstName: user.firstname },
-//         conversationId: conversation._id,
-//       };
-//     })
-//   );
-//   res.status(200).json(await conversationUserData);
-// });
-
-// //store msg
-// export const messages = catchAsyncError(async (req, res) => {
-//   const { conversationId, senderId, message } = req.body;
-//   if (!senderId || !message)
-//     return res.status(400).send("please fill all required fields");
-//   if (!conversationId && receiverId) {
-//     const newConversation = new Conversations({
-//       members: [senderId, receiverId],
-//     });
-//     await newConversation.save();
-//     const newMessage = new Messages({
-//       conversationId: newConversation._id,
-//       senderId,
-//       message,
-//     });
-//     await newMessage.save();
-//     res.status(200).send("Message sent successfully");
-//   } else if (!conversationId && !receiverId) {
-//     return res.status(400).send("please fill all required fields");
-//   }
-//   const newMessage = new Messages({ conversationId, senderId, message });
-//   await newMessage.save();
-//   res.status(200).send("Message sent successfully");
-// });
-
-// // get msg
-// export const getMessages = catchAsyncError(async (req, res) => {
-//   const conversationId = req.params.conversationId;
-//   if (conversationId === "new") return res.status(200).json([]);
-//   const messages = await Messages.find({ conversationId });
-//   const messageUserData = Promise.all(
-//     messages.map(async (message) => {
-//       const user = await register.findById(message.senderId);
-//       return {
-//         user: { email: user.email, firstName: user.firstname },
-//         message: message.message,
-//       };
-//     })
-//   );
-
-//   res.status(200).json(await messageUserData);
-// });
-
-//
+// chat
 
 export const searchUser = catchAsyncError(async (req, res, next) => {
   const keyword = req.query.search ? {
@@ -389,6 +308,7 @@ export const searchUser = catchAsyncError(async (req, res, next) => {
   } : null;
 
   console.log(keyword)
+  
   if (!keyword) return next(new errorHandler("Please Enter Something ", 400));
 
   const users = await register.find(keyword).find({_id: {$ne: req.user._id}});
@@ -401,8 +321,9 @@ export const searchUser = catchAsyncError(async (req, res, next) => {
   // res.send(users);
 })
 
+
 export const accessChat = catchAsyncError(async (req, res) => {
-  console.log("hello")
+  console.log("hello");
   const { userId } = req.body;
 
   if (!userId) {
@@ -517,7 +438,7 @@ export const sendMessage = catchAsyncError(async (req, res) => {
       path: "chat.users",  //pending chat field is not in register model
       select: "firstname lastname compnyname ",
     });
-    console.log(message)
+    console.log(message);
 
     await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message });
     res.status(200).send(message);

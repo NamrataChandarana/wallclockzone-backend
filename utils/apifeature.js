@@ -3,6 +3,7 @@ export class Apifeature {
     this.query = query;
     this.queryStr = queryStr;
   }
+  
 
   search() {
     const keyword = this.queryStr.keyword
@@ -18,16 +19,15 @@ export class Apifeature {
     return this;
   }
 
-  filter() {
-    const queryCopy = { ...this.queryStr };
-    console.log(queryCopy);
-    const removeFields = ["keyword", "page", "limit"];
+  // filter() {
+  //   const queryCopy = { ...this.queryStr };
+  //   const removeFields = ["keyword", "page", "limit"];
 
-    removeFields.forEach((key) => delete queryCopy[key]);
+  //   removeFields.forEach((key) => delete queryCopy[key]);
 
-    console.log(queryCopy);
+  //   console.log(queryCopy);
 
-    this.query = this.query.find(queryCopy);
-    return this;
-  }
+  //   this.query = this.query.find(queryCopy);
+  //   return this;
+  // }
 }

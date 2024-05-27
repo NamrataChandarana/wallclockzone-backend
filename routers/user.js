@@ -14,20 +14,14 @@ import {
   getUsers,
   forgetPassword,
   resetPassword,
-  accessChat,
-  fetchChats,
-  searchUser,
-  allMessages,
-  sendMessage
-  // conversations,
-  // getConversations,
-  // messages,
-  // getMessages,
-} from "../controllers/usercontroller.js";
+  // accessChat,
+  // fetchChats,
+  // searchUser,
+  // allMessages,
+  // sendMessage
+} from "../controllers/userController.js";
 import { isAuthenticate } from "../middleware/auth.js";
 import { authorizeRoles } from "../middleware/auth.js";
-import jwt from "jsonwebtoken";
-// import {user} from "../models/user.js";
 
 const router = express.Router();
 
@@ -39,18 +33,12 @@ router.put("/me/update", updateUserProfile);
 router.post("/forgetPassword", forgetPassword);
 router.put("/resetPassword/:token", resetPassword);
 
-//chat router
-// router.post("/conversations", isAuthenticate, conversations);
-// router.get("/conversations/:userId", isAuthenticate, getConversations);
-// router.post("/messages", isAuthenticate, messages);
-// router.get("/messages/:conversationId", isAuthenticate, getMessages);
-
-// not
-router.route("/chat").post(isAuthenticate, accessChat);
-router.route("/getchat").get(isAuthenticate, fetchChats);
-router.route("/searchUser").get(isAuthenticate, searchUser);
-router.route("/getMsg/:chatId").get(isAuthenticate, allMessages);
-router.route("/sendMsg").post(isAuthenticate, sendMessage);
+//chat
+// router.route("/chat").post(isAuthenticate, accessChat);
+// router.route("/getchat").get(isAuthenticate, fetchChats);
+// router.route("/searchUser").get(isAuthenticate, searchUser);
+// router.route("/getMsg/:chatId").get(isAuthenticate, allMessages);
+// router.route("/sendMsg").post(isAuthenticate, sendMessage);
 
 // admin router
 router.get(

@@ -4,6 +4,8 @@ config({
 });
 import express from "express";
 import userRouter from "./routers/user.js";
+import chatRouter from './routers/chat.js';
+import categoryRouter from "./routers/category.js";
 import { connectDB } from "./data/database.js";
 import cookieParser from "cookie-parser";
 import { errorMiddleware } from "./middleware/error.js";
@@ -12,7 +14,6 @@ import cors from "cors";
 import { Server } from "socket.io";
 import { Socket } from "dgram";
 import { createServer } from "http";
-
 // import cookieParser from 'cookie-parser';
 // import { connect } from 'http2';
 
@@ -39,21 +40,13 @@ app.use(express.static(path.join(path.resolve(), "public")));
 //setting view engine
 app.set("view engine", "ejs");
 
-// app.use((req, res, next) => {
-//   res.header("Access-Control-Allow-Origin: http://localhost:3000");
-//   res.header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-//   res.header(
-//     "Access-Control-Allow-Headers: Content-Type, Authorization, X-Auth-Token, Origin"
-//   );
-//   res.header("Access-Control-Allow-Credentials", "true");
-//   next();
-// });
-
 //middelwares
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.json());
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/chat", chatRouter);
+app.use("/api/v1/category", categoryRouter);
 
 //error middelware
 app.use(errorMiddleware);
@@ -61,12 +54,10 @@ app.use(errorMiddleware);
 //db connection
 connectDB();
 
-
 const listen = app.listen(process.env.PORT, (req, res) => {
   console.log(`done and ${process.env.FRONTEND_URL}`);
 });
 
-// const server = createServer(app);
 
 const io = new Server(listen,{
   pingTimeout: 60000,
@@ -121,7 +112,6 @@ io.on("connection", (socket) => {
     socket.leave(userData._id);
   })
 });
-
 
 
 //unhandled error (server error)
