@@ -1,3 +1,7 @@
+import { catchAsyncError } from "../middleware/catchAsyncError.js";
+import { Chat } from "../models/chatModel.js";
+import { register } from "../models/user.js";
+
 // chat
 
 export const searchUser = catchAsyncError(async (req, res, next) => {
