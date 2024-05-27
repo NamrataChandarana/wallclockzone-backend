@@ -14,11 +14,6 @@ import {
   getUsers,
   forgetPassword,
   resetPassword,
-  // accessChat,
-  // fetchChats,
-  // searchUser,
-  // allMessages,
-  // sendMessage
 } from "../controllers/userController.js";
 import { isAuthenticate } from "../middleware/auth.js";
 import { authorizeRoles } from "../middleware/auth.js";

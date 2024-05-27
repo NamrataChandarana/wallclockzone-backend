@@ -5,7 +5,7 @@ import {
     searchUser,
     allMessages,
     sendMessage
-  } from "../controllers/usercontroller.js";
+  } from "../controllers/chatController.js";
 import { isAuthenticate } from "../middleware/auth.js";
 
 const router = Router();
