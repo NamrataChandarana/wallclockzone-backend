@@ -14,7 +14,7 @@ import {
   getUsers,
   forgetPassword,
   resetPassword
-} from "../controllers/userController.js";
+} from "../controllers/usercontroller.js";
 import { isAuthenticate } from "../middleware/auth.js";
 import { authorizeRoles } from "../middleware/auth.js";
 
