@@ -6,25 +6,29 @@ import { errorHandler } from "../middleware/error.js";
 import { Apifeature } from "../utils/apifeature.js";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
-import { Chat } from "../models/chatModel.js";
-import { Message } from "../models/messageModel.js";
+import { loginInput, registrationInput } from "../utils/inputValidation.js";
 
 // registration
 export const userRegister = catchAsyncError(async (req, res, next) => {
+
+  const {success} = registrationInput.safeParse(req.body);
+  if(!success) return next(new errorHandler("Invlaid Inputs",400))
+
   const {
-    firstname,
-    lastname,
+    firstname,//1
+    lastname,//2
     companyname,
-    phoneNo,
-    username,
-    password,
+    phoneNo,//3
+    username,//4
+    password,//5
     category,
     city,
     state,
-    address,
-    email,
+    address, //street
+    email,//6
     website,
-  } = req.body;
+  } = (req.body);
+  
 
   let user = await register.findOne({ email });
 
@@ -52,20 +56,24 @@ export const userRegister = catchAsyncError(async (req, res, next) => {
   });
 
   sendcookie(user, res, 201, "Register successfully");
+
 });
 
 // login
 export const userLogin = catchAsyncError(async (req, res, next) => {
+
+  const {success} = loginInput.safeParse(req.body);
+  if(!success) return next(new errorHandler("Invlaid Inputs",400));
+
   const { email, password } = req.body;
 
   let user = await register.findOne({ email }).select("+password");
-  console.log(user);
 
-  if (!user) next(new errorHandler("Invalid Email or Password ", 400));
+  if (!user) return next(new errorHandler("Invalid Email or Password ", 400));
 
   const isMatch = await bycrypt.compare(password, user.password);
 
-  if (!isMatch) next(new errorHandler("Invalid Email or Password ", 400));
+  if (!isMatch) return next(new errorHandler("Invalid Email or Password ", 400));
 
   // console.log(user._id);
   sendcookie(user, res, 200, `welcome back, ${user.firstname}`);

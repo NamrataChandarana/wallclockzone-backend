@@ -52,11 +52,11 @@ export const accessChat = catchAsyncError(async (req, res) => {
   // console.log(register);
   isChat = await Chat.populate(isChat, {
     path: "latestMessage.sender",
-    select: "firstname email",
+    select: "firstname email companyname",
   });
 
   if (isChat.length > 0) {
-    res.send(isChat[0]);
+    return res.send(isChat[0]);
     console.log(isChat[0])
   } else {
     var chatData = {
@@ -65,19 +65,15 @@ export const accessChat = catchAsyncError(async (req, res) => {
       users: [req.user._id, userId],
     };
 
-    try {
-      const createdChat = await Chat.create(chatData);
-      const FullChat = await Chat.findOne({ _id: createdChat._id }).populate(
-        "users",
-        "-password"
-      );
-      res.status(200).json(FullChat);
-    } catch (error) {
-      res.status(400);
-      throw new Error(error.message);
+    const createdChat = await Chat.create(chatData);
+    const FullChat = await Chat.findOne({ _id: createdChat._id }).populate(
+      "users",
+      "-password"
+    );
+    console.log(res)
+    return res.status(200).json(FullChat);
+  
     }
-  }
-  console.log(res)
 });
 
 //getchat
