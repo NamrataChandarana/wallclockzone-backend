@@ -29,15 +29,13 @@ export const searchUser = catchAsyncError(async (req, res, next) => {
   
   
 export const accessChat = catchAsyncError(async (req, res) => {
-  console.log("hello");
-  const { userId } = req.body;
 
+  const { userId } = req.body;
   if (!userId) {
     console.log("UserId param not sent with request");
     return res.sendStatus(400);
   }
 
-  // console.log(req.user);
   var isChat = await Chat.find({
     isGroupChat: false,
     $and: [
@@ -78,24 +76,17 @@ export const accessChat = catchAsyncError(async (req, res) => {
 
 //getchat
 export const fetchChats = catchAsyncError(async (req, res) => {
-  try {
-    Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })
-      .populate("users", "-password")
-      // .populate("groupAdmin", "-password")
-      .populate("latestMessage")
-      .sort({ updatedAt: -1 })
-      .then(async (results) => {
-        results = await register.populate(results, {
-          path: "latestMessage.sender",
-          select: "firstname email",
-        });
-        console.log(results);
-        res.status(200).send(results);
+  Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })
+    .populate("users", "-password")
+    .populate("latestMessage")
+    .sort({ updatedAt: -1 })
+    .then(async (results) => {
+      results = await register.populate(results, {
+        path: "latestMessage.sender",
+        select: "firstname email companyname",
       });
-  } catch (error) {
-    res.status(400);
-    throw new Error(error.message);
-  }
+      return res.status(200).send(results);
+  });
 });
 
 

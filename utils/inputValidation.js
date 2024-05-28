@@ -4,8 +4,8 @@ import {z} from 'zod';
 //     "manufacuture",
 
 // ];
-const stringPasswordSchema = z.string().max(8, 'Password must be at most 8 characters long');
-const numberPasswordSchema = z.number().max(99999999, 'Password must be at most 8 digits long');;
+const stringPasswordSchema = z.string().min(8, 'Password must be at most 8 characters long');
+const numberPasswordSchema = z.number().min(99999999, 'Password must be at most 8 digits long');;
 
 export const registrationInput = z.object({
     firstname: z.string(),
