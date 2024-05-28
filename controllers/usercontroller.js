@@ -212,7 +212,6 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
 
 
 //admin
-
 // Get all users(admin)
 export const getAllUser = catchAsyncError(async (req, res, next) => {
   const users = await register.find();
@@ -252,13 +251,11 @@ export const getSingleUser = catchAsyncError(async (req, res, next) => {
 // Delete User --Admin
 export const deleteUser = catchAsyncError(async (req, res, next) => {
   const user = await register.findById(req.params.id);
-  console.log(req.params.id);
-  console.log(user);
 
   if (!user)
     return next(
       new errorHandler(`User does not exist with Id: ${req.params.id}`, 400)
-    );
+  );
 
   await user.deleteOne();
 

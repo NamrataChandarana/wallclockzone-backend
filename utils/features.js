@@ -1,6 +1,4 @@
 import jwt from "jsonwebtoken";
-import nodemon from "nodemon";
-// import staticrouter from "./routers/staticrouter.js";
 
 export const sendcookie = (user, res, statuscode = 200, message) => {
 
@@ -11,8 +9,7 @@ export const sendcookie = (user, res, statuscode = 200, message) => {
     .cookie("token", token, {
       httpOnly: true,
       maxAge: 3 * 60 * 60 * 1000,
-      // sameSite: process.env.NODE_ENV === "Development" ? "lax" : "none",
-      sameSite: "lax",
+      sameSite: process.env.NODE_ENV === "Development" ? "lax" : "none",
       secure: process.env.NODE_ENV === "Development" ? false : true,
     })
     .json({
