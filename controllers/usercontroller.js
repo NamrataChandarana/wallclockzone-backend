@@ -105,6 +105,7 @@ export const logout = catchAsyncError((req, res, next) => {
 
 //update profile
 export const updateUserProfile = catchAsyncError(async (req, res, next) => {
+  console.log(req.user)
   const newUserData = {
     firstname: req.body.firstname,
     lastname: req.body.lastname,

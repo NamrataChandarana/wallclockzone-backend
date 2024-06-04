@@ -13,10 +13,25 @@ export const isAuthenticate = async (req, res, next) => {
     return;
   }
 
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = await register.findById(decoded._id);
 
-  req.user = await register.findById(decoded._id);
-  next();
+    if (!req.user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    next();
+  }catch(error){
+    console.error("Error during authentication: ", error);
+    return res.status(401).json({
+      success: false,
+      message: "Authentication failed",
+    });
+  }
+
 };
 
 //authorization
