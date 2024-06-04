@@ -91,16 +91,10 @@ export const fetchChats = catchAsyncError(async (req, res) => {
 
 
 export const allMessages = catchAsyncError(async (req, res) => {
-  // console.log(typeOf (req.params.chatId));
-  try {
-    var messages = await Message.find({ chat: req.params.chatId })
-        .populate("sender", "firstname companyname email")
-        .populate("chat");
-    res.status(200).send(messages);
-  } catch (error) {
-    res.status(400);
-    throw new Error(error.message);
-  }
+  var messages = await Message.find({ chat: req.params.chatId })
+      .populate("sender", "firstname companyname email")
+      .populate("chat");
+  res.status(200).send(messages);
 });
 
 //@description     Create New Message
@@ -108,7 +102,6 @@ export const allMessages = catchAsyncError(async (req, res) => {
 //@access          Protected
 export const sendMessage = catchAsyncError(async (req, res) => {
   const { content, chatId } = req.body;
-  console.log(chatId);
 
   if (!content || !chatId) {
     console.log("Invalid data passed into request");
@@ -121,23 +114,14 @@ export const sendMessage = catchAsyncError(async (req, res) => {
     chat: chatId,
   };
 
-  try {
-    var message = await Message.create(newMessage);
-    console.log(message);
+  var message = await Message.create(newMessage);
+  message = await message.populate("sender", "firstname lastname username companyname") 
+  message = await message.populate("chat")
+  message = await register.populate(message, {
+    path: "chat.users",  
+    select: "firstname lastname companyname ",
+  });
 
-    message = await message.populate("sender", "firstname lastname username compnyname") 
-    message = await message.populate("chat")
-    message = await register.populate(message, {
-      path: "chat.users",  //pending chat field is not in register model
-      select: "firstname lastname compnyname ",
-    });
-    console.log(message);
-
-    await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message });
-    res.status(200).send(message);
-    
-  } catch (error) {
-    res.status(400);
-    throw new Error(error.message);
-  }
+  await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message });
+  return res.status(200).send(message);
 });

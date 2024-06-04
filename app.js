@@ -70,13 +70,10 @@ const io = new Server(listen,{
 
 io.on("connection", (socket) => {
   console.log("user connected",socket.id);
-  // console.log("Id", socket.id);
 
   socket.on('setup',(userData)=>{
-    // console.log(userData._id)
     socket.join(userData._id);
     socket.emit("connected");
-    console.log("emit");
   })
 
   socket.on("join chat", (room) => {
@@ -85,22 +82,21 @@ io.on("connection", (socket) => {
   });
 
   socket.on("typing", (data) => {
-    console.log(data)
-    socket.to(data.chatId).emit('typing', data)});
+    socket.to(data.chatId).emit('typing', data);
+  });
+
   socket.on("stop typing", (data) => {
     socket.to(data.chatId).emit('stop typing', data);
-});
+  });
 
   socket.on("new message", (newMessageRecieved) => {
-    // console.log(newMessageRecieved);
-    console.log("hello")
+
     if(!newMessageRecieved) return
     var chat = newMessageRecieved.chat;
 
     if (!chat.users) return console.log("chat.users not defined");
 
     chat.users.forEach((user) => {
-      console.log("hello users")
       if (user._id == newMessageRecieved.sender._id) return;
       socket.in(user._id).emit("message recieved", newMessageRecieved);
       console.log("send");
