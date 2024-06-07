@@ -7,14 +7,14 @@ export const registrationInput = z.object({
     firstname: z.string(),
     lastname: z.string(),
     companyname: z.string(),
-    phoneNo: z.number().max(9999999999),
+    phoneNo: z.number().min(9999999999, 'Input must be equal to 10 digits').max(9999999999,'Input must be equal to 10 digits'),
     username: z.string(),
-    password: z.union([stringPasswordSchema, numberPasswordSchema]),
+    password: z.union([stringPasswordSchema, numberPasswordSchema], ),
     category: z.string(),
     city: z.string(),
     state: z.string(),
     address: z.string(), 
-    email: z.string().email(),
+    email: z.string().email("Enter valid email"),
     website: z.string().url().optional(),
 })
 

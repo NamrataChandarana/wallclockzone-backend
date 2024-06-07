@@ -11,9 +11,12 @@ import { loginInput, registrationInput } from "../utils/inputValidation.js";
 // registration
 export const userRegister = catchAsyncError(async (req, res, next) => {
 
-  const {success} = registrationInput.safeParse(req.body);
-  if(!success) return next(new errorHandler("Invlaid Inputs",400))
-
+  const {success, error} = registrationInput.safeParse(req.body);
+  console.log(success, error.message)
+  if (!success) {
+    const errorMessage = error.errors.map(err => `${err.path.join('.')} : ${err.message}`).join(', ');
+    return next(new errorHandler(`Invalid Inputs: ${errorMessage}`, 400));
+  }
   const {
     firstname,//1
     lastname,//2
