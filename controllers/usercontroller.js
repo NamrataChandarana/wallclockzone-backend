@@ -15,7 +15,12 @@ export const userRegister = catchAsyncError(async (req, res, next) => {
   console.log(success, error.message)
   if (!success) {
     const errorMessage = error.errors.map(err => `${err.path.join('.')} : ${err.message}`).join(', ');
-    return next(new errorHandler(`Invalid Inputs: ${errorMessage}`, 400));
+    const errors = error.errors.reduce((acc, err) => {
+      acc[err.path[0]] = err.message;
+      return acc;
+    }, {});
+
+    return res.status(400).json({ success: false, errors });
   }
   const {
     firstname,//1
