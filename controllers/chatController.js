@@ -9,7 +9,7 @@ export const searchUser = catchAsyncError(async (req, res, next) => {
     const keyword = req.query.search ? {
       $or: [
         {companyname: {$regex: req.query.search, $options: "i"}},
-        {email: {$regex: req.query.search, $options: "i"}},
+        {email: {$regex: req.query.search, $options: "i"}}
       ],
     } : null;
   

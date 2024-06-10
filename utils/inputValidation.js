@@ -7,7 +7,7 @@ export const registrationInput = z.object({
     firstname: z.string(),
     lastname: z.string(),
     companyname: z.string(),
-    phoneNo: z.number().min(9999999999, 'Input must be equal to 10 digits').max(9999999999,'Input must be equal to 10 digits'),
+    phoneNo: z.string().length(10, 'Input must be equal to 10 digits').regex(/^\d{10}$/, 'Input must be equal to 10 digits'),
     username: z.string(),
     password: z.union([stringPasswordSchema, numberPasswordSchema], ),
     category: z.string(),
