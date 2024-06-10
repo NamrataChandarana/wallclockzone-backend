@@ -12,7 +12,6 @@ import { loginInput, registrationInput } from "../utils/inputValidation.js";
 export const userRegister = catchAsyncError(async (req, res, next) => {
 
   const {success, error} = registrationInput.safeParse(req.body);
-  console.log(success, error.message)
   if (!success) {
     const errorMessage = error.errors.map(err => `${err.path.join('.')} : ${err.message}`).join(', ');
     const errors = error.errors.reduce((acc, err) => {
