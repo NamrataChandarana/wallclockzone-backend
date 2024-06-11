@@ -13,26 +13,26 @@ export const userRegister = catchAsyncError(async (req, res, next) => {
 
   const {success, error} = registrationInput.safeParse(req.body);
   if (!success) {
-    const errorMessage = error.errors.map(err => `${err.path.join('.')} : ${err.message}`).join(', ');
+    const errorMessage = error.errors.map(err => `${err.path.join('.')} : ${err?.message}`).join(', ');
     const errors = error.errors.reduce((acc, err) => {
-      acc[err.path[0]] = err.message;
+      acc[err.path[0]] = err?.message;
       return acc;
     }, {});
 
     return res.status(400).json({ success: false, errors });
   }
   const {
-    firstname,//1
-    lastname,//2
+    firstname,
+    lastname,
     companyname,
-    phoneNo,//3
-    username,//4
-    password,//5
+    phoneNo,
+    username,
+    password,
     category,
     city,
     state,
-    address, //street
-    email,//6
+    address, 
+    email,
     website,
   } = (req.body);
   
@@ -62,7 +62,7 @@ export const userRegister = catchAsyncError(async (req, res, next) => {
     website,
   });
 
-  sendcookie(user, res, 201, "Register successfully");
+  sendcookie(user, res, 201);
 
 });
 

@@ -20,5 +20,5 @@ export const registrationInput = z.object({
 
 export const loginInput = z.object({
     email: z.string().email(),
-    password: z.union([stringPasswordSchema, numberPasswordSchema])
+    // password: z.union([stringPasswordSchema, numberPasswordSchema])
 })
