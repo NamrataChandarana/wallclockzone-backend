@@ -222,7 +222,7 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
 //admin
 // Get all users(admin)
 export const getAllUser = catchAsyncError(async (req, res, next) => {
-  const users = await register.find();
+  const users = await register.find({role: { $ne: 'admin' }});
 
   res.status(200).json({
     success: true,
