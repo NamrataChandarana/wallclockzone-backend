@@ -12,6 +12,7 @@ import { errorMiddleware } from "./middleware/error.js";
 import path from "path";
 import cors from "cors";
 import { Server } from "socket.io";
+import adminRouter from './routers/admin.js'
 import { Socket } from "dgram";
 import { createServer } from "http";
 // import cookieParser from 'cookie-parser';
@@ -48,6 +49,7 @@ app.use(express.json());
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/chat", chatRouter);
 app.use("/api/v1/category", categoryRouter);
+app.use("/api/v1/admin", adminRouter)
 
 //error middelware
 app.use(errorMiddleware);

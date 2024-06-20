@@ -8,6 +8,7 @@ import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
 import { loginInput, registrationInput } from "../utils/inputValidation.js";
 
+
 // registration
 export const userRegister = catchAsyncError(async (req, res, next) => {
 
@@ -161,13 +162,11 @@ export const forgetPassword = catchAsyncError(async (req, res,next) => {
   const { email } = req.body;
   const user = await register.findOne({ email });
   if (!user) res.status(400).send("User not found");
-  // console.log(user);
 
   //generate Token
   const resetToken = await user.getResetToken();
   await user.save();
-  // console.log(resetToken);
-
+  
   const url = `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`;
   console.log(url);
 
@@ -219,94 +218,7 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
 
 
 
-//admin
-// Get all users(admin)
-export const getAllUser = catchAsyncError(async (req, res, next) => {
-  const users = await register.find({role: { $ne: 'admin' }});
 
-  res.status(200).json({
-    success: true,
-    users,
-  });
-});
-
-//  get all unapprove user --admin
-export const getallnewusers = catchAsyncError(async (req, res, next) => {
-  const user = await register.find({ status: "false" });
-
-  res.json({
-    success: "ture",
-    user,
-  });
-});
-
-// Get single user (admin)
-export const getSingleUser = catchAsyncError(async (req, res, next) => {
-  const user = await register.findById(req.params.id);
-
-  if (!user) {
-    return next(
-      new errorHandler(`User does not exist with Id: ${req.params.id}`)
-    );
-  }
-
-  res.status(200).json({
-    success: true,
-    user,
-  });
-});
-
-// Delete User --Admin
-export const deleteUser = catchAsyncError(async (req, res, next) => {
-  const user = await register.findById(req.params.id);
-
-  if (!user)
-    return next(
-      new errorHandler(`User does not exist with Id: ${req.params.id}`, 400)
-  );
-
-  await user.deleteOne();
-
-  res.status(200).json({
-    success: true,
-    message: "User Deleted Successfully",
-  });
-});
-
-// approveUser by admin  --admin
-export const updateUserStatus = catchAsyncError(async (req, res, next) => {
-  const user = await register.findById(req.params.id);
-  console.log(req.params.id);
-  console.log(user);
-
-  if (!user)
-    return next(
-      new errorHandler(`User does not exist with Id: ${req.params.id}`, 400)
-    );
-
-  if (user.status == false) {
-    user.status = "true";
-  } else {
-    user.status = "false";
-  }
-
-  await user.save();
-
-  res.status(200).json({
-    success: true,
-    message: "status updated",
-  });
-});
-
-//2. all approved user admin
-export const getApprovedUsers = catchAsyncError(async (req, res, next) => {
-  const user = await register.find({ status: "true" });
-
-  res.json({
-    success: "ture",
-    user,
-  });
-});
 
 
 
