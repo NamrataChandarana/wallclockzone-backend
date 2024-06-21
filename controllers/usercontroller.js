@@ -83,7 +83,6 @@ export const userLogin = catchAsyncError(async (req, res, next) => {
 
   if (!isMatch) return next(new errorHandler("Invalid Email or Password ", 400));
 
-  // console.log(user._id);
   sendcookie(user, res, 200, `welcome back, ${user.firstname}`);
 });
 
@@ -113,7 +112,6 @@ export const logout = catchAsyncError((req, res, next) => {
 
 //update profile
 export const updateUserProfile = catchAsyncError(async (req, res, next) => {
-  console.log(req.user)
   const newUserData = {
     firstname: req.body.firstname,
     lastname: req.body.lastname,
@@ -168,7 +166,6 @@ export const forgetPassword = catchAsyncError(async (req, res,next) => {
   await user.save();
   
   const url = `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`;
-  console.log(url);
 
   const msg = `Click on link to reset password. ${url}.`;
 
@@ -183,7 +180,6 @@ export const forgetPassword = catchAsyncError(async (req, res,next) => {
 //resetPassword
 export const resetPassword = catchAsyncError(async (req, res, next) => {
   const { token } = req.params;
-  console.log(token);
 
   const resetPasswordToken = crypto
     .createHash("sha256")
@@ -194,7 +190,6 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
     resetPasswordToken,
     resetPasswordExpire: { $gt: Date.now() },
   });
-  console.log(user);
   if (!user) return next(new errorHandler("Invalid token or it is expired"));
 
   const hashpwd = await bycrypt.hash(req.body.password, 10);

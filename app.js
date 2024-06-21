@@ -1,6 +1,6 @@
 import { config } from "dotenv";
 config({
-  path: "./data/config.env",
+  path: "./config.env",
 });
 import express from "express";
 import userRouter from "./routers/user.js";
