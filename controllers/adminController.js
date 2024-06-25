@@ -64,9 +64,7 @@ export const deleteUser = catchAsyncError(async (req, res, next) => {
 // approveUser by admin  --admin
 export const updateUserStatus = catchAsyncError(async (req, res, next) => {
     const user = await register.findById(req.params.id);
-    console.log(req.params.id);
-    console.log(user);
-  
+
     if (!user)
       return next(
         new errorHandler(`User does not exist with Id: ${req.params.id}`, 400)
@@ -79,11 +77,18 @@ export const updateUserStatus = catchAsyncError(async (req, res, next) => {
     }
   
     await user.save();
-  
-    res.status(200).json({
-      success: true,
-      message: "status updated",
-    });
+
+    if (user.status == false) {
+      res.status(200).json({
+        success: true,
+        message: `User ${req.params.id} Disapprove!`,
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: `User ${req.params.id} Approve!`,
+      });
+    }
 });
 
 //2. all approved user admin
