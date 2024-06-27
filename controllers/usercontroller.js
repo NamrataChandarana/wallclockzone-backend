@@ -88,7 +88,7 @@ export const userLogin = catchAsyncError(async (req, res, next) => {
 
 // get profile
 export const myProfile = catchAsyncError((req, res, next) => {
-  res.status(200).json({
+  return res.status(200).json({
     success: true,
     user: req.user,
   });
