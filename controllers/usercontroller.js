@@ -88,6 +88,10 @@ export const userLogin = catchAsyncError(async (req, res, next) => {
 
 // get profile
 export const myProfile = catchAsyncError((req, res, next) => {
+  if (!req.user) {
+    return next(new errorHandler("User not found", 404));
+  }
+  
   return res.status(200).json({
     success: true,
     user: req.user,
