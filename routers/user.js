@@ -8,7 +8,8 @@ import {
   getUsers,
   forgetPassword,
   resetPassword,
-  userSignin
+  userSignin,
+  UserProfileUpdate
 } from "../controllers/usercontroller.js";
 import { isAuthenticate } from "../middleware/auth.js";
 import { authorizeRoles } from "../middleware/auth.js";
@@ -20,7 +21,10 @@ router.post("/login", userLogin);
 router.post("/signin", userSignin);
 router.get("/me", isAuthenticate, myProfile);
 router.get("/logout", logout);
+//Register user
 router.put("/me/update", isAuthenticate, updateUserProfile);
+//Non Register user
+router.put("/me/edit", isAuthenticate, UserProfileUpdate);
 router.post("/forgetPassword", forgetPassword);
 router.put("/resetPassword/:token", resetPassword);
 router.get("/allusers", getUsers);

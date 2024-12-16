@@ -7,7 +7,7 @@ import { Apifeature } from "../utils/apifeature.js";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
 import { loginInput, registrationInput, signinInput } from "../utils/inputValidation.js";
-import { user } from "../models/user.js";
+import { user} from "../models/user.js";
 
 
 // registration
@@ -158,7 +158,7 @@ export const logout = catchAsyncError((req, res, next) => {
     });
 });
 
-//update profile
+//update Register user profile 
 export const updateUserProfile = catchAsyncError(async (req, res, next) => {
   const newUserData = {
     firstname: req.body.firstname,
@@ -187,6 +187,27 @@ export const updateUserProfile = catchAsyncError(async (req, res, next) => {
   });
 });
 
+//update Non Register user profile
+export const UserProfileUpdate = catchAsyncError(async (req, res, next) => {
+
+  const newUserData = {
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+  };
+
+  const User = await user.findByIdAndUpdate(req.user.id, newUserData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "updated Successfully",
+    User,
+  });
+});
 // get all user --search side
 export const getUsers = catchAsyncError(async (req, res, next) => {
   const apifeature = new Apifeature(
