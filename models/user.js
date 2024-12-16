@@ -7,7 +7,11 @@ const userSchema = mongoose.Schema({
     isAdmin: {
         type: Boolean,
         default: false
-    }
+    },
+    isRegister: {
+        type: Boolean,
+        default: false
+    },
 })
 
 export const user = new mongoose.model("user",userSchema);

@@ -68,6 +68,10 @@ const registrationSchema = new mongoose.Schema({
     type: String,
     default: "user",
   },
+  isRegister: {
+    type: Boolean,
+    default: true
+  },
   resetPasswordToken: String,
   resetPasswordExpire: String,
 });
