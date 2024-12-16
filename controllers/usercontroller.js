@@ -1,4 +1,4 @@
-import { register } from "../models/user.js";
+import { register } from "../models/registerUser.js";
 import bycrypt from "bcryptjs";
 import { sendcookie } from "../utils/features.js";
 import { catchAsyncError } from "../middleware/catchAsyncError.js";
@@ -6,7 +6,8 @@ import { errorHandler } from "../middleware/error.js";
 import { Apifeature } from "../utils/apifeature.js";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
-import { loginInput, registrationInput } from "../utils/inputValidation.js";
+import { loginInput, registrationInput, signinInput } from "../utils/inputValidation.js";
+import { user } from "../models/user.js";
 
 
 // registration
@@ -67,6 +68,42 @@ export const userRegister = catchAsyncError(async (req, res, next) => {
 
 });
 
+//signin
+export const userSignin = catchAsyncError(async (req, res, next) => {
+
+  const {success, error} = signinInput.safeParse(req.body);
+  if (!success) {
+    const errorMessage = error.errors.map(err => `${err.path.join('.')} : ${err?.message}`).join(', ');
+    const errors = error.errors.reduce((acc, err) => {
+      acc[err.path[0]] = err?.message;
+      return acc;
+    }, {});
+
+    return res.status(400).json({ success: false, errors });
+  }
+  const {
+    name,
+    email,
+    password
+  } = (req.body);
+  
+
+  let registerUser = await register.findOne({ email });
+  let User = await user.findOne({email});
+
+  if (User || registerUser) return next(new errorHandler("User already exists", 409));
+
+  const hashpwd = await bycrypt.hash(password, 10);
+
+  User = await user.create({
+    name,
+    email,
+    password: hashpwd
+  })
+
+  sendcookie(user, res, 201);
+});
+
 // login
 export const userLogin = catchAsyncError(async (req, res, next) => {
 
@@ -75,15 +112,22 @@ export const userLogin = catchAsyncError(async (req, res, next) => {
 
   const { email, password } = req.body;
 
-  let user = await register.findOne({ email }).select("+password");
+  let registerUser = await register.findOne({ email }).select("+password");
+  let newUser = await user.findOne({email}).select("+password");
 
-  if (!user) return next(new errorHandler("Invalid Email or Password ", 400));
+  if (!registerUser && !newUser) return next(new errorHandler("Invalid Email or Password ", 400));
 
-  const isMatch = await bycrypt.compare(password, user.password);
+  let isMatch;
+  if(registerUser){
+    isMatch = await bycrypt.compare(password, registerUser.password);
+  }else{
+    isMatch = await bycrypt.compare(password, newUser.password);
+  }
 
   if (!isMatch) return next(new errorHandler("Invalid Email or Password ", 400));
 
-  sendcookie(user, res, 200, `welcome back, ${user.firstname}`);
+  (registerUser) ? sendcookie(registerUser, res, 200, `Login successfully`) : sendcookie(newUser, res, 200, `Login successfully`);
+
 });
 
 // get profile

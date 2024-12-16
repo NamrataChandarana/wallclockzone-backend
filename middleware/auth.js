@@ -1,21 +1,21 @@
 import jwt from "jsonwebtoken";
-import { register } from "../models/user.js";
+import { register } from "../models/registerUser.js";
 import { errorHandler } from "./error.js";
+import { user } from "../models/user.js";
 
 export const isAuthenticate = async (req, res, next) => {
   const { token } = req.cookies;
 
   if (!token) {
-    res.json({
+    return res.status(200).json({
       success: false,
       message: "Not logged in",
     });
-    return;
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await register.findById(decoded._id);
+    req.user = await register.findById(decoded._id) || await user.findById(decoded._id);
 
     if (!req.user) {
       return res.status(404).json({
@@ -35,13 +35,12 @@ export const isAuthenticate = async (req, res, next) => {
 };
 
 //authorization
-
 export const authorizeRoles = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return next(
         new errorHandler(
-          `Role: ${req.user.role} is not allowed to access this Recources`,
+          `Role: User does not have permission`,
           403
         )
       );

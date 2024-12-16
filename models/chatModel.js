@@ -1,6 +1,5 @@
-// const mongoose = require("mongoose");
 import mongoose from "mongoose";
-import { register } from "./user.js";
+import { register } from "./registerUser.js";
 import { Message } from "./messageModel.js";
 
 const chatModel = mongoose.Schema(
@@ -17,16 +16,3 @@ const chatModel = mongoose.Schema(
 );
 
 export const Chat = mongoose.model("Chat", chatModel);
-
-
-// const conversationSchema = mongoose.Schema({
-//   members: {
-//     type: Array,
-//     required: true,
-//   },
-// });
-
-// export const Conversations = mongoose.model(
-//   "Conversations",
-//   conversationSchema
-// );

@@ -1,7 +1,7 @@
-import exp from "constants";
-import { connect } from "http2";
+// import exp from "constants";
+// import { connect } from "http2";
 import mongoose from "mongoose";
-import { State } from "country-state-city";
+// import { State } from "country-state-city";
 
 // db connection
 export const connectDB = (db) => {

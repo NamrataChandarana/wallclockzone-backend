@@ -7,7 +7,8 @@ import {
   updateUserProfile,
   getUsers,
   forgetPassword,
-  resetPassword
+  resetPassword,
+  userSignin
 } from "../controllers/usercontroller.js";
 import { isAuthenticate } from "../middleware/auth.js";
 import { authorizeRoles } from "../middleware/auth.js";
@@ -16,6 +17,7 @@ const router = express.Router();
 
 router.post("/new", userRegister);
 router.post("/login", userLogin);
+router.post("/signin", userSignin);
 router.get("/me", isAuthenticate, myProfile);
 router.get("/logout", logout);
 router.put("/me/update", isAuthenticate, updateUserProfile);

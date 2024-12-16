@@ -3,8 +3,8 @@ import { errorHandler } from "../middleware/error.js";
 import categoryModel from "../models/categoryModel.js";
 import { Chat } from "../models/chatModel.js";
 import { Message } from "../models/messageModel.js";
-import { register } from "../models/user.js";
-import slugify from "slugify";
+import { register } from "../models/registerUser.js";
+
 //admin
 // Get all users(admin)
 export const getAllUser = catchAsyncError(async (req, res, next) => {

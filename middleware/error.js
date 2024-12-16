@@ -6,8 +6,8 @@ export class errorHandler extends Error {
 }
 
 export const errorMiddleware = (err, req, res, next) => {
-  err.message = err.message || "Internal server Error";
-  err.statuscode = err.statuscode || 500;
+  const message = err.message || "Internal server Error";
+  const statuscode = err.statuscode || 500;
 
   //mongodb error cast error
   if (err.name === "CastError") {
@@ -15,8 +15,8 @@ export const errorMiddleware = (err, req, res, next) => {
     err = new errorHandler(message, 400);
   }
 
-  return res.status(404).json({
+  return res.status(statuscode).json({
     success: false,
-    message: err.message,
+    message,
   });
 };

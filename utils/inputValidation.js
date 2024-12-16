@@ -22,3 +22,9 @@ export const loginInput = z.object({
     email: z.string().email(),
     // password: z.union([stringPasswordSchema, numberPasswordSchema])
 })
+
+export const signinInput = z.object({
+    name: z.string(),
+    email: z.string().email(),
+    password: z.union([stringPasswordSchema, numberPasswordSchema], ),
+})

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { register } from "./user.js";
+import { register } from "./registerUser.js";
 import { Chat } from "./chatModel.js";
 
 // const messageSchema = mongoose.Schema({
