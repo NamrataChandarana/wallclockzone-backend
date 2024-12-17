@@ -2,6 +2,7 @@ import { catchAsyncError } from "../middleware/catchAsyncError.js";
 import { Chat } from "../models/chatModel.js";
 import { register } from "../models/registerUser.js";
 import { Message } from "../models/messageModel.js";
+import { user } from "../models/user.js";
 
 // chat
 
@@ -108,20 +109,29 @@ export const sendMessage = catchAsyncError(async (req, res) => {
     return res.sendStatus(400);
   }
 
-  var newMessage = {
-    sender: req.user._id,
+  const userModel = await user.find({_id: req.user._id.toString()});
+  let sendModle;
+  if(!userModel){
+    sendModle = "registration"
+  }else{
+    sendModle = "user"
+  }
+
+  const newMessage = {
+    sender: req.user._id.toString(),
+    senderModel: sendModle,
     content: content,
     chat: chatId,
   };
 
   var message = await Message.create(newMessage);
-  message = await message.populate("sender", "firstname lastname username companyname") 
+  message = await message.populate("sender", "firstname lastname username companyname name") 
   message = await message.populate("chat")
   message = await register.populate(message, {
     path: "chat.users",  
     select: "firstname lastname companyname ",
   });
 
-  await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message });
+  await Chat.findByIdAndUpdate(chatId, { latestMessage: message });
   return res.status(200).send(message);
 });
