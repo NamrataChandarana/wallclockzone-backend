@@ -37,22 +37,20 @@ export const accessChat = catchAsyncError(async (req, res) => {
     return res.sendStatus(400);
   }
 
-  var isChat = await Chat.find({
+  let isChat = await Chat.find({
     isGroupChat: false,
     $and: [
       { users: { $elemMatch: { $eq: req.user._id } } },
       { users: { $elemMatch: { $eq: userId } } },
     ],
   })
-    .populate({
-      path: "users",
-      select: "-password",
-      populate: { path: "senderModel" }, 
-    })
-    .populate("latestMessage");
+  .populate({
+    path: "users",
+    select: "-password",
+    populate: { path: "senderModel" }, // Populate dynamically based on `senderModel`
+  })
+  .populate("latestMessage");
 
-  // console.log(isChat);
-  // console.log(register);
   isChat = await Chat.populate(isChat, {
     path: "latestMessage.sender",
     select: "firstname email companyname name",
@@ -60,7 +58,7 @@ export const accessChat = catchAsyncError(async (req, res) => {
 
   if (isChat.length > 0) {
     return res.send(isChat[0]);
-    
+    console.log(isChat[0])
   } else {
 
     const registerSender = await register.find({_id: req.user._id});
@@ -91,25 +89,21 @@ export const accessChat = catchAsyncError(async (req, res) => {
       select: "-password",
       populate: { path: "senderModel" }, 
     }).populate("latestMessage");
+
     return res.status(200).json(FullChat);
-  
     }
 });
 
 //getchat
 export const fetchChats = catchAsyncError(async (req, res) => {
   Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })
-    .populate({
-      path: "users",
-      select: "-password",
-      populate: { path: "senderModel" }, // Dynamically populate `senderModel`
-    })
+    .populate("users", "-password")
     .populate("latestMessage")
     .sort({ updatedAt: -1 })
     .then(async (results) => {
       results = await register.populate(results, {
         path: "latestMessage.sender",
-        select: "firstname email companyname name",
+        select: "firstname email companyname",
       });
       return res.status(200).send(results);
   });
