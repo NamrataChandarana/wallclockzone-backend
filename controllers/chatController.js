@@ -44,32 +44,53 @@ export const accessChat = catchAsyncError(async (req, res) => {
       { users: { $elemMatch: { $eq: userId } } },
     ],
   })
-    .populate("users", "-password")
+    .populate({
+      path: "users",
+      select: "-password",
+      populate: { path: "senderModel" }, 
+    })
     .populate("latestMessage");
 
   // console.log(isChat);
   // console.log(register);
   isChat = await Chat.populate(isChat, {
     path: "latestMessage.sender",
-    select: "firstname email companyname",
+    select: "firstname email companyname name",
   });
 
   if (isChat.length > 0) {
     return res.send(isChat[0]);
-    console.log(isChat[0])
+    
   } else {
-    var chatData = {
+
+    const registerSender = await register.find({_id: req.user._id});
+    const sender = await user.find({_id: req.user._id});
+    const reciever = await user.find({_id: userId});
+    const registerReciever = await register.find({_id:userId});
+
+    let userModel;
+    if(registerSender && reciever){
+      userModel = [{_id: req.user._id, senderModel: "registration"}, {_id: userId, senderModel: "user"}]
+    }else if(registerSender && registerReciever){
+      userModel = [{_id: req.user._id, senderModel: "registration"}, {_id: userId, senderModel: "registration"}]
+    }else if(sender && registerReciever){
+      userModel = [{_id: req.user._id, senderModel: "user"}, {_id: userId, senderModel: "registration"}]
+    }else{
+      userModel = [{_id: req.user._id, senderModel: "user"}, {_id: userId, senderModel: "registration"}]
+    }
+
+    let chatData = {
       chatName: "sender",
       isGroupChat: false,
-      users: [req.user._id, userId],
+      users: userModel,
     };
 
     const createdChat = await Chat.create(chatData);
-    const FullChat = await Chat.findOne({ _id: createdChat._id }).populate(
-      "users",
-      "-password"
-    );
-    console.log(res)
+    const FullChat = await Chat.findOne({ _id: createdChat._id }).populate({
+      path: "users",
+      select: "-password",
+      populate: { path: "senderModel" }, 
+    }).populate("latestMessage");
     return res.status(200).json(FullChat);
   
     }
@@ -78,13 +99,17 @@ export const accessChat = catchAsyncError(async (req, res) => {
 //getchat
 export const fetchChats = catchAsyncError(async (req, res) => {
   Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })
-    .populate("users", "-password")
+    .populate({
+      path: "users",
+      select: "-password",
+      populate: { path: "senderModel" }, // Dynamically populate `senderModel`
+    })
     .populate("latestMessage")
     .sort({ updatedAt: -1 })
     .then(async (results) => {
       results = await register.populate(results, {
         path: "latestMessage.sender",
-        select: "firstname email companyname",
+        select: "firstname email companyname name",
       });
       return res.status(200).send(results);
   });

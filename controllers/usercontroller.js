@@ -101,7 +101,7 @@ export const userSignin = catchAsyncError(async (req, res, next) => {
     password: hashpwd
   })
 
-  sendcookie(user, res, 201);
+  sendcookie(User, res, 201);
 });
 
 // login
