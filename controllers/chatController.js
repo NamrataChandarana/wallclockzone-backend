@@ -26,8 +26,7 @@ export const searchUser = catchAsyncError(async (req, res, next) => {
       users
     })
     // res.send(users);
-  })
-  
+})
   
 export const accessChat = catchAsyncError(async (req, res) => {
 
@@ -40,14 +39,12 @@ export const accessChat = catchAsyncError(async (req, res) => {
   let isChat = await Chat.find({
     isGroupChat: false,
     $and: [
-      { users: { $elemMatch: { $eq: req.user._id } } },
-      { users: { $elemMatch: { $eq: userId } } },
+      { users: { $elemMatch: { userId: req.user._id.toString() } } },
+      { users: { $elemMatch: { userId: userId } } },
     ],
-  })
-  .populate({
-    path: "users",
+  }).populate({
+    path: "users.userId",
     select: "-password",
-    populate: { path: "senderModel" }, // Populate dynamically based on `senderModel`
   })
   .populate("latestMessage");
 
@@ -58,7 +55,6 @@ export const accessChat = catchAsyncError(async (req, res) => {
 
   if (isChat.length > 0) {
     return res.send(isChat[0]);
-    console.log(isChat[0])
   } else {
 
     const registerSender = await register.find({_id: req.user._id});
@@ -68,13 +64,13 @@ export const accessChat = catchAsyncError(async (req, res) => {
 
     let userModel;
     if(registerSender && reciever){
-      userModel = [{_id: req.user._id, senderModel: "registration"}, {_id: userId, senderModel: "user"}]
+      userModel = [{userId: req.user._id, senderModel: "registration"}, {userId: userId, senderModel: "user"}]
     }else if(registerSender && registerReciever){
-      userModel = [{_id: req.user._id, senderModel: "registration"}, {_id: userId, senderModel: "registration"}]
+      userModel = [{userId: req.user._id, senderModel: "registration"}, {userId: userId, senderModel: "registration"}]
     }else if(sender && registerReciever){
-      userModel = [{_id: req.user._id, senderModel: "user"}, {_id: userId, senderModel: "registration"}]
+      userModel = [{userId: req.user._id, senderModel: "user"}, {userId: userId, senderModel: "registration"}]
     }else{
-      userModel = [{_id: req.user._id, senderModel: "user"}, {_id: userId, senderModel: "registration"}]
+      userModel = [{userId: req.user._id, senderModel: "user"}, {userId: userId, senderModel: "registration"}]
     }
 
     let chatData = {
@@ -84,29 +80,30 @@ export const accessChat = catchAsyncError(async (req, res) => {
     };
 
     const createdChat = await Chat.create(chatData);
-    const FullChat = await Chat.findOne({ _id: createdChat._id }).populate({
-      path: "users",
-      select: "-password",
-      populate: { path: "senderModel" }, 
-    }).populate("latestMessage");
-
+    let FullChat = await Chat.find({ _id: createdChat._id }).populate({
+      path:"users.userId",
+      select:"-password",
+      options: { strictPopulate: false },
+    })
     return res.status(200).json(FullChat);
     }
 });
 
 //getchat
 export const fetchChats = catchAsyncError(async (req, res) => {
-  Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })
-    .populate("users", "-password")
+
+
+  let data = await Chat.find({users: { $elemMatch: { userId: req.user._id } } })
+    .populate({
+      path: "users.userId",
+      select: "-password",
+    })
     .populate("latestMessage")
-    .sort({ updatedAt: -1 })
-    .then(async (results) => {
-      results = await register.populate(results, {
+    .sort({ updatedAt: -1 }).populate({
         path: "latestMessage.sender",
-        select: "firstname email companyname",
+        select: "firstname email companyname name",
       });
-      return res.status(200).send(results);
-  });
+      return res.status(200).send(data);
 });
 
 
@@ -128,12 +125,13 @@ export const sendMessage = catchAsyncError(async (req, res) => {
     return res.sendStatus(400);
   }
 
-  const userModel = await user.find({_id: req.user._id.toString()});
+  const userModel = await register.find({_id: req.user._id.toString()});
+
   let sendModle;
-  if(!userModel){
-    sendModle = "registration"
-  }else{
+  if(userModel.length === 0){
     sendModle = "user"
+  }else{
+    sendModle = "registration"
   }
 
   const newMessage = {
@@ -143,12 +141,13 @@ export const sendMessage = catchAsyncError(async (req, res) => {
     chat: chatId,
   };
 
-  var message = await Message.create(newMessage);
-  message = await message.populate("sender", "firstname lastname username companyname name") 
+  let message = await Message.create(newMessage);
+  console.log(message)
+  message = await message.populate("sender", "firstname lastname username companyname name")
   message = await message.populate("chat")
   message = await register.populate(message, {
     path: "chat.users",  
-    select: "firstname lastname companyname ",
+    select: "firstname lastname companyname name",
   });
 
   await Chat.findByIdAndUpdate(chatId, { latestMessage: message });
