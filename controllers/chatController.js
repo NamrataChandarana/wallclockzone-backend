@@ -52,32 +52,43 @@ export const accessChat = catchAsyncError(async (req, res) => {
     path: "latestMessage.sender",
     select: "firstname email companyname name",
   });
-
+console.log(isChat);
   if (isChat.length > 0) {
     return res.send(isChat[0]);
   } else {
 
-    const registerSender = await register.find({_id: req.user._id});
-    const sender = await user.find({_id: req.user._id});
-    const reciever = await user.find({_id: userId});
-    const registerReciever = await register.find({_id:userId});
+    const registerSender = await register.findOne({_id: req.user._id});
+    const sender = await user.findOne({_id: req.user._id});
+    const receiver = await user.findOne({_id: userId});
+    const registerReceiver = await register.findOne({_id:userId});
 
-    let userModel;
-    if(registerSender && reciever){
-      userModel = [{userId: req.user._id, senderModel: "registration"}, {userId: userId, senderModel: "user"}]
-    }else if(registerSender && registerReciever){
-      userModel = [{userId: req.user._id, senderModel: "registration"}, {userId: userId, senderModel: "registration"}]
-    }else if(sender && registerReciever){
-      userModel = [{userId: req.user._id, senderModel: "user"}, {userId: userId, senderModel: "registration"}]
-    }else{
-      userModel = [{userId: req.user._id, senderModel: "user"}, {userId: userId, senderModel: "registration"}]
-    }
+    let userModel = [];
+
+  // Handle sender's model
+  if (registerSender) {
+    userModel.push({ userId: req.user._id.toString(), senderModel: "registration" });
+  } else if (sender) {
+    userModel.push({ userId: req.user._id.toString(), senderModel: "user" });
+  } else {
+    userModel.push({ userId: null, senderModel: "unknown" });
+  }
+  
+  // Handle receiver's model
+  if (registerReceiver) {
+    userModel.push({ userId: userId, senderModel: "registration" });
+  } else if (receiver) {
+    userModel.push({ userId: userId, senderModel: "user" });
+  } else {
+    userModel.push({ userId: null, senderModel: "unknown" });
+}
+    
 
     let chatData = {
       chatName: "sender",
       isGroupChat: false,
       users: userModel,
     };
+    console.log(chatData);
 
     const createdChat = await Chat.create(chatData);
     let FullChat = await Chat.find({ _id: createdChat._id }).populate({
@@ -85,7 +96,7 @@ export const accessChat = catchAsyncError(async (req, res) => {
       select:"-password",
       options: { strictPopulate: false },
     })
-    return res.status(200).json(FullChat);
+    return res.status(200).json(FullChat[0]);
     }
 });
 
