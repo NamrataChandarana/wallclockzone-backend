@@ -69,7 +69,7 @@ export const userRegister = catchAsyncError(async (req, res, next) => {
 });
 
 //signin
-export const userSignin = catchAsyncError(async (req, res, next) => {
+export const userSignup = catchAsyncError(async (req, res, next) => {
 
   const {success, error} = signinInput.safeParse(req.body);
   if (!success) {
@@ -202,10 +202,14 @@ export const UserProfileUpdate = catchAsyncError(async (req, res, next) => {
     useFindAndModify: false,
   });
 
+  if(!User){
+    return next(new errorHandler("User does not found!",400));
+  }
+
   res.status(200).json({
     success: true,
     message: "updated Successfully",
-    User,
+    user: User,
   });
 });
 // get all user --search side

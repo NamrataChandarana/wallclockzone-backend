@@ -8,7 +8,7 @@ import {
   getUsers,
   forgetPassword,
   resetPassword,
-  userSignin,
+  userSignup,
   UserProfileUpdate
 } from "../controllers/usercontroller.js";
 import { isAuthenticate } from "../middleware/auth.js";
@@ -18,7 +18,7 @@ const router = express.Router();
 
 router.post("/new", userRegister);
 router.post("/login", userLogin);
-router.post("/signin", userSignin);
+router.post("/signup", userSignup);
 router.get("/me", isAuthenticate, myProfile);
 router.get("/logout", logout);
 //Register user
